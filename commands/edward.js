@@ -19,6 +19,6 @@ module.exports = {
       .setDescription("King")
       .setImage(link)
       return message.channel.send(newEmbed)
-      // console.log("Sent Edward Picture w/ File Path:", directory + imgArray[num])
+      console.log("Sent Edward Picture w/ File Path:", directory + imgArray[num])
     },
 };

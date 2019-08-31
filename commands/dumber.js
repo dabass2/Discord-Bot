@@ -40,5 +40,9 @@ module.exports = {
           .addField('It would seem', dumbAns + ' is a fucking idiot')
           return message.channel.send(newEmbed);
         }
+        else if (args.length > 2)
+        {
+          message.channel.send("lol I'm not coding that wtf dude")
+        }
     },
 };

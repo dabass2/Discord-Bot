@@ -1,20 +1,29 @@
 const fs = require('fs');
 const Discord = require("discord.js");
 const botconfig = require("./botconfig.json");
-const jikanjs = require('jikanjs');
-
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const jikanjs = require('jikanjs'); // Uses per default the API version 3
+const datamuse = require('datamuse');
 
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
+    // set a new item in the Collection
+    // with the key as the command name and the value as the exported module
     client.commands.set(command.name, command);
 }
 
 client.on("ready", () => {
   console.log(`${client.user.username} is online`);
   client.user.setActivity("Epic Games Launcher");
+  // jikanjs.loadSchedule("monday").then((response) => {
+  //     response.monday.forEach(element => {
+  //       console.log(element.title)
+  //     })
+  //   }).catch((err) => {
+  //     console.log(err)
+  //   })
 });
 
 client.on("message", message => {
@@ -35,7 +44,7 @@ client.on("message", message => {
   "nino nakano", "anime scenery", "anime foood", "anime", "komi-san",
   "anime dance", "anime funny", "riko love live sunshine", "anime fight gif"]
 
-  if (message.isMentioned("500122158039826433"))
+  if (message.isMentioned("502146559287492619"))
   {
     message.author.send("What the FUCKCKCKCKCKCCKKCCKCKCK DO YOUW AN NAANNTNTNTNTNTTNTTTT")
   }
@@ -47,7 +56,10 @@ client.on("message", message => {
     .setImage("https://leinad.pw/images/fair.png")
     return message.channel.send(newEmbed);
   }
-
+  if (cmd === `syn`)
+  {
+    client.commands.get(`syn`).execute(message, args)
+  }
   if (cmd === `8ballz`)
   {
     const ballArray = ["Does it matter", "I guess", "Like I care", "Fuck off", "Suck dick", "Yeah sure", "You wish you could", "Literally die"]
@@ -58,53 +70,57 @@ client.on("message", message => {
     return message.channel.send(newEmbed);
     console.log(ballArray[arrayChoice])
   }
-
+  // if (cmd === `schedule` && message.author.id === "122090401011073029")
+  // {
+  //   client.commands.get(`schedule`).execute(message, args)
+  // }
+  if (cmd === `test`)
+  {
+    let airingDay = jikanjs.loadSchedule('Monday').then((response) => {
+      response['Monday'].forEach(element => {
+        shows.push(element.title)
+      })
+    }).catch((err) => {
+      console.log(err)
+    })
+  }
   if (cmd === `rmeme`)
   {
     client.commands.get(`meme`).execute(message, args)
   }
-
   if (cmd === `edward`)
   {
-    console.log("ff")
     client.commands.get(`edward`).execute(message, args)
   }
-
   if (cmd === `roll`)
   {
     let newEmbed = new Discord.RichEmbed()
     client.commands.get(`roll`).execute(message, args, newEmbed);
   }
-
-  if (cmd === `kateball`)
+  if (cmd === `kateAdvice`)
   {
-    console.log("f")
     const newEmbed = new Discord.RichEmbed()
     .setColor(0xFFFF)
     .setTitle("Kate Says!")
     .setDescription("just hit it hard tomorrow")
     return message.channel.send(newEmbed);
   }
-
-  if (cmd === `glugglug` && message.author.id === "468421106219614208")
+  if (cmd === `glugglug`)
   {
     const newEmbed = new Discord.RichEmbed()
     .setColor(0x800080)
     .setImage("https://leinad.pw/images/crowDog.jpg")
     return message.channel.send(newEmbed)
   }
-
   if (cmd === `expert`)
   {
     const newEmbed = new Discord.RichEmbed()
     client.commands.get(`expert`).execute(message, args, newEmbed)
   }
-
   if (cmd === `ping` && message.author.id === "122090401011073029")
   {
     client.commands.get(`ping`).execute(message, args);
   }
-
   if (cmd  === `log` && message.author.id === "122090401011073029")
   {
     message.reply("Logs PM'd to you : )")
@@ -112,46 +128,25 @@ client.on("message", message => {
       .then(messages => console.log(`Received ${messages.size} messages`))
       .catch(console.error);
   }
-
   if (cmd === `praise`)
   {
     const newEmbed = new Discord.RichEmbed()
     client.commands.get(`praise`).execute(message, args, newEmbed);
   }
-
   if (cmd === `dumber`)
   {
     const newEmbed = new Discord.RichEmbed()
     client.commands.get(`dumber`).execute(message, args, newEmbed)
   }
-
   if (cmd === `daddy`)
   {
     const newEmbed = new Discord.RichEmbed()
     client.commands.get(`daddy`).execute(message, args, newEmbed)
   }
-
   if (cmd === `anime`)
   {
     client.commands.get(`anime`).execute(message, args)
   }
-
-  if (cmd === `info`)
-  {
-    let newEmbed = new Discord.RichEmbed()
-    client.commands.get(`info`).execute(message, args, newEmbed)
-  }
-
-  if (cmd === `pin`)
-  {
-    client.commands.get(`pin`).execute(message, args)
-  }
-
-  if (cmd === `help`)
-  {
-    client.commands.get(`help`).execute(message, args)
-  }
-  
   if (cmd === `noah`)
   {
     if (args[0] == 'request')
@@ -174,8 +169,19 @@ client.on("message", message => {
       return message.channel.send(newEmbed);
     }
   }
-
-
+  if (cmd === `info`)
+  {
+    let newEmbed = new Discord.RichEmbed()
+    client.commands.get(`info`).execute(message, args, newEmbed)
+  }
+  if (cmd === `pin`)
+  {
+    client.commands.get(`pin`).execute(message, args)
+  }
+  if (cmd === `help`)
+  {
+    client.commands.get(`help`).execute(message, args)
+  }
 });
 
 client.login(botconfig.token);

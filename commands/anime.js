@@ -99,6 +99,7 @@ module.exports = {
               })
             }).catch((err) => {
               message.channel.send("error uwu try again :3333")
+              console.log(err)
             })
 
             Promise.all([airingDay, userWatching]).then(() => {

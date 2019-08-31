@@ -116,28 +116,6 @@ module.exports = {
           message.channel.send({embed});
           console.log(d4)
         }
-        if (args[0] == `d10`)
-        {
-          var total = 0
-          if (args.length > 1)
-          {
-            for (var i = 0; i < args[1]; i++)
-            {
-              total += (Math.floor(Math.random() * 9)+1)
-            }
-          }
-          else
-          {
-            total += (Math.floor(Math.random() * 9)+1)
-          }
-          var d10 = total
-          const embed = new Discord.RichEmbed()
-          .setColor(0x34CD32)
-          .addField("Rolling a d10", d10)
-          .setTimestamp(new Date())
-          message.channel.send({embed});
-          console.log(d10)
-        }
         if(args.length === 0)
         {
           message.channel.send("Type !roll {dice type} [# rolls]")
