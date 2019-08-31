@@ -117,6 +117,9 @@ module.exports = {
               message.channel.send({embed});
             })
           }
+
+          /* Maybe actually do one day */
+
           // else if (args[2] == undefined) //!anime schedule [day] (schedule based on day username from file)
           // {
           //   const directory = "users.txt"
@@ -142,6 +145,7 @@ module.exports = {
           //     message.channel.send("error uwu try again :3333")
           //   })
           // }
+
           if (args[2] === undefined)
           {
             Promise.all([airingDay]).then(() => {
@@ -155,7 +159,6 @@ module.exports = {
             })
           }
         }
-        //message.channel.reply("please put a day I don't wanna deal with this rn")
       }
 
     }

@@ -3,8 +3,6 @@ module.exports = {
     description: 'roll dnd',
     execute(message, args, newEmbed) {
         const Discord = require("discord.js")
-        // var b = Math.floor(Math.random() * 8)
-        // message.channel.send(b);
         if (args[0] == `d20`)
         {
           var total = 0
@@ -22,7 +20,6 @@ module.exports = {
           var d20 = total
           const embed = new Discord.RichEmbed()
           .setColor(0x34CD32)
-          // .setImage("https://leinad.pw/images/die.jpg")
           .addField("Rolling a d20..", d20)
           .setTimestamp(new Date())
           message.channel.send({embed});

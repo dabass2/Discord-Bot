@@ -11,7 +11,6 @@ module.exports = {
         imgArray.push(file)
       });
       var num = Math.floor(Math.random() * imgArray.length)
-      // message.channel.send("Edward", { file: directory + imgArray[num] })
       let link = "https://leinad.pw/images/edward/" + imgArray[num]
       console.log(link)
       const newEmbed = new Discord.RichEmbed()
