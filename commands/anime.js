@@ -75,18 +75,23 @@ module.exports = {
         //!anime schedule [day] (schedule based on certain day)
         if (args[1])
         {
-          let day = args[1]
-          let shows = []
+          let day = args[1]  // User input'd day
+          day = day.toLowerCase()
+
+          let shows = {}
+          let links = []
           let watching = []
           let int = ''
           let userWatching
 
           let airingDay = jikanjs.loadSchedule(day).then((response) => {
             response[day].forEach(element => {
-              shows.push(element.title)
+              shows[element.title] = element.url  // Name of shows airing that day
+              console.log(shows)
             })
           }).catch((err) => {
             message.channel.send("ut oh! I had a fucky wucky!! please trwy agwain uwu")
+            console.log(err)
           })
 
           //!anime schedule [day] [username] (schedule based on day and certain user)
@@ -102,65 +107,36 @@ module.exports = {
             })
 
             Promise.all([airingDay, userWatching]).then(() => {
-              let int = shows.filter(value => watching.includes(value))
-              if (int.length === 0)
+              let int = Object.keys(shows).filter(value => watching.includes(value)) // Finds shows that release and the usr is watching
+              if (int.length === 0)  // No show releasing that day the user is watching
               {
-                int.push("None")
+                int.push("No watching shows releasing!")
               }
-              console.log(int)
+              console.log(`On ${day} ${username} is watching ${int}`)
               const embed = new Discord.RichEmbed()
-              .setColor(0xb19cd9)
-              .setTitle('Currently Airing Anime')
-              .setDescription(day.charAt(0).toUpperCase() + day.slice(1))
-              .addField('Anime', int)
+              .setColor(0xf56f42)
+              .setTitle('__Currently Airing Anime__')
+              .setDescription(day.charAt(0).toUpperCase() + day.slice(1)) // Makes first letter of the day Cap
+              .addField('__Anime__', int)
               .setTimestamp(new Date())
-              message.channel.send({embed});
+              message.channel.send({embed});  // Sends gathered info
             })
           }
 
-          /* Maybe actually do one day */
-
-          // else if (args[2] == undefined) //!anime schedule [day] (schedule based on day username from file)
-          // {
-          //   const directory = "users.txt"
-          //   let users = []
-          //
-          //   let rl = readline.createInterface({
-          //       input: fs.createReadStream(directory)
-          //   });
-          //
-          //   let line_no = 0;
-          //   rl.on('line', async function(line) {
-          //       line_no++;
-          //       console.log(line)
-          //       await users.push(line)
-          //     })
-          //   console.log(users)
-          //
-          //   userWatching = jikanjs.loadUser('NotFunstuff', 'animelist', 'watching').then((response) => {
-          //     response.anime.forEach(element => {
-          //       watching.push(element.title)
-          //     })
-          //   }).catch((err) => {
-          //     message.channel.send("error uwu try again :3333")
-          //   })
-          // }
-
-          if (args[2] === undefined)
+          if (args[2] === undefined)  // No user so just sends what's releasing that day
           {
             Promise.all([airingDay]).then(() => {
               const embed = new Discord.RichEmbed()
-              .setColor(0xb19cd9)
-              .setTitle('Currently Airing Anime')
-              .setDescription(day.charAt(0).toUpperCase() + day.slice(1))
-              .addField('Anime', shows)
+              .setColor(0xf56f42)
+              .setTitle('__Currently Airing Anime__')
+              .setDescription(day.charAt(0).toUpperCase() + day.slice(1)) // Makes first letter of the day Cap
+              .addField('__Anime__', Object.keys(shows))
               .setTimestamp(new Date())
               message.channel.send({embed});
             })
           }
         }
       }
-
     }
   }
 }
