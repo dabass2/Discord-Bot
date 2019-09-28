@@ -94,6 +94,11 @@ client.on("message", message => {
     client.commands.get(`anime`).execute(message, args)
   }
 
+  if (cmd === `manga`)
+  {
+    client.commands.get(`manga`).execute(message, args)
+  }
+
   if (cmd === `info`)
   {
     let newEmbed = new Discord.RichEmbed()
