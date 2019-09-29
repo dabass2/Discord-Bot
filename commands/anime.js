@@ -77,6 +77,7 @@ module.exports = {
         {
           let day = args[1]  // User input'd day
           day = day.toLowerCase()
+          dayList = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 
           let shows = {}
           let links = []
