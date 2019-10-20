@@ -84,7 +84,11 @@ module.exports = {
           let watching = []
           let int = ''
           let userWatching
-
+          
+          if (dayList.includes(day) === false)
+          {
+            return(message.reply("Please send a valid day of the week as the third argument."))
+          }
           let airingDay = jikanjs.loadSchedule(day).then((response) => {
             response[day].forEach(element => {
               shows[element.title] = element.url  // Name of shows airing that day
@@ -101,7 +105,7 @@ module.exports = {
             let username = args[2]
             userWatching = jikanjs.loadUser(username, 'animelist', 'watching').then((response) => {
               response.anime.forEach(element => {
-                watching.push(element.title)
+                watching.push(`${element.title}: [link](${element.url})`)
               })
             }).catch((err) => {
               message.channel.send("error uwu try again :3333")
