@@ -133,7 +133,6 @@ client.on("message", message => {
     .setColor(0x32CD32)
     .addField(`8ball says:`, ballArray[arrayChoice])
     return message.channel.send(newEmbed);
-    console.log(ballArray[arrayChoice])
   }
 
   if (cmd === `kateball`)

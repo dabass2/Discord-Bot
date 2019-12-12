@@ -33,9 +33,11 @@ module.exports = {
         }
         else  // If user gives no number, print first 10
         {
+          message.channel.send("Last 10 Updated Manga!")
           for (var i = 0; i < 10; i++)
           {
             console.log(mangaList[i].title)
+            message.channel.send(mangaList[i].title)
           }
         }
       })();
