@@ -1,6 +1,6 @@
 module.exports = {
     name: 'expert',
-    description: 'expert',
+    description: "For when there's an expert in the chat",
     execute(message, args, newEmbed) {
         newEmbed
         .setColor("#FFFF")

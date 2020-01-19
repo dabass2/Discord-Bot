@@ -1,7 +1,7 @@
 module.exports = {
-    name: 'meme',
+    name: 'rmeme',
     description: 'Sends random meme',
-    execute(message, args) {
+    execute(message, args, newEmbed) {
       var fs = require('fs');
       var files = fs.readdirSync('../images/memes')
       let chosenFile = files[Math.floor(Math.random() * files.length)]

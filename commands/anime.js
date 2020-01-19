@@ -1,11 +1,10 @@
 module.exports = {
   name: 'anime',
-  description: 'Post anime',
-  execute(message, args)
+  description: "Find anime pictures or see what's airing!",
+  execute(message, args, newEmbed)
   {
     const fs = require('fs');
     const jikanjs = require('jikanjs');
-    const Discord = require("discord.js");
 
     // console.log(args.length)
     if (args.length < 1)
@@ -28,11 +27,11 @@ module.exports = {
           })
           .then(function(res) {
               var randIndex = Math.floor(Math.random() * Math.floor(res.length))
-              const embed = new Discord.RichEmbed()
+              newEmbed
               .setColor(0x32CD32)
               .setImage(res[randIndex].url)
               .setTimestamp(new Date())
-              message.channel.send({embed});
+              message.channel.send(newEmbed);
               console.log("Sent anime message with keyword: ", keyword)
           }).catch((err) => {
             console.log(err)
@@ -110,26 +109,26 @@ module.exports = {
                 int.push("No watching shows releasing!")
               }
               console.log(`On ${day} ${username} is watching ${int}`)
-              const embed = new Discord.RichEmbed()
+              newEmbed
               .setColor(0xf56f42)
               .setTitle('__Currently Airing Anime__')
               .setDescription(day.charAt(0).toUpperCase() + day.slice(1)) // Makes first letter of the day Cap
               .addField('__Anime__', int)
               .setTimestamp(new Date())
-              message.channel.send({embed});  // Sends gathered info
+              message.channel.send(newEmbed);  // Sends gathered info
             })
           }
 
           if (args[2] === undefined)  // No user so just sends what's releasing that day
           {
             Promise.all([airingDay]).then(() => {
-              const embed = new Discord.RichEmbed()
+              newEmbed
               .setColor(0xf56f42)
               .setTitle('__Currently Airing Anime__')
               .setDescription(day.charAt(0).toUpperCase() + day.slice(1)) // Makes first letter of the day Cap
               .addField('__Anime__', Object.keys(shows))
               .setTimestamp(new Date())
-              message.channel.send({embed});
+              message.channel.send(-newEmbed);
             })
           }
         }

@@ -1,8 +1,7 @@
 module.exports = {
     name: 'edward',
-    description: 'Edward Cat',
-    execute(message, args) {
-      const Discord = require("discord.js")
+    description: 'Sends a picture of our lord',
+    execute(message, args, newEmbed) {
       const directory = '../../var/www/leinad.pw/html/images/edward/';
       const fs = require('fs');
       let imgArray = []
@@ -13,7 +12,7 @@ module.exports = {
       var num = Math.floor(Math.random() * imgArray.length)
       let link = "https://leinad.pw/images/edward/" + imgArray[num]
       console.log(link)
-      const newEmbed = new Discord.RichEmbed()
+      newEmbed
       .setColor(0xf4b042)
       .setDescription("King")
       .setImage(link)

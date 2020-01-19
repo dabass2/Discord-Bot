@@ -1,7 +1,7 @@
 module.exports = {
     name: 'manga',
     description: 'MangaDex RSS Feed',
-    execute(message, args) {
+    execute(message, args, newEmbed) {
       let Parser = require('rss-parser');
       let parser = new Parser();
       let mangaList = [];
