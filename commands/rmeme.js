@@ -3,11 +3,14 @@ module.exports = {
     description: 'Sends random meme',
     execute(message, args, newEmbed) {
       var fs = require('fs');
-      var files = fs.readdirSync('../images/memes')
-      let chosenFile = files[Math.floor(Math.random() * files.length)]
-      console.log(chosenFile)
-      message.channel.send("https://leinad.pw/myMemesFuckingSuckDude/", {
-        file: "../images/memes/" + chosenFile
+      var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
+      var file = images.images[Math.floor(Math.random() * images.size)]
+      var format = file.format  // format should usually be jpg, but..
+      if (format == "JPEG") {
+        format = "jpg"
+      }
+      message.channel.send(`Random meme with score: ${file.score}`, {
+        file: `../images/memes/${file.name}.${format}`
       });
     },
 };
