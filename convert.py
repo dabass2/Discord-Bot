@@ -27,7 +27,7 @@ def createJson(image_list):
     lib = {"images": {}, "size": 0} # empty dict with only images and size key
     for i in range(len(image_list)):
         name = image_list[i].filename.split("\\")[-1][0:-4]
-        lib["images"][i] = {"name": name, "format": image_list[i].format, "score": 0}
+        lib["images"][i] = {"name": name, "format": image_list[i].format, "score": 100}
         lib["size"] = lib["size"] + 1
 
     with open("./images.json", "w", encoding="utf-8") as f:
@@ -65,7 +65,7 @@ def main():
     '''
     Gather all images in folder with specified ending
     '''
-    for filename in glob.glob('./memes/*.jpg'): #assuming gif
+    for filename in glob.glob('./memes/*.jpg'):
         im=Image.open(filename)
         image_list.append(im)
 

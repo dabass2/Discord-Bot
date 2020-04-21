@@ -1,0 +1,21 @@
+{
+  "name": "testbot",
+  "version": "1.0.0",
+  "description": "Test Bot ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Daniel Bass",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^11.5.1",
+    "images-scraper": "^2.0.11",
+    "jikanjs": "^0.7.0",
+    "request": "^2.88.0",
+    "rss-parser": "^3.7.2",
+    "select-random-file": "^1.1.0"
+  },
+  "devDependencies": {},
+  "keywords": []
+}
