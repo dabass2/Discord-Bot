@@ -2,9 +2,9 @@ module.exports = {
     name: 'rmeme',
     description: 'Sends random meme',
     execute(message, args, newEmbed) {
+      var fs = require('fs');
       if (args.length === 0)
       {
-        var fs = require('fs');
         var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
         var num = Math.floor(images.size * Math.random())
         var file = images.images[num]
@@ -41,7 +41,60 @@ module.exports = {
           ).catch(err => {console.log(err)})
         });
       } else if (args.length >= 1) {
-        message.channel.send("hello sir")
+        if ((args[0] === 'upvote' || args[0] === 'downvote') && args[1])
+        {
+          try {
+            var num = Number(args[1])
+            var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
+            if (num >= 0 && num <= images.size)
+            {
+              var file = images.images[num]
+              var format = file.format
+              if (format == "JPEG") {
+                format = "jpg"
+              }
+              var newScore = args[0] === 'upvote' ? file.score + 1 : file.score - 1 
+              file.score = newScore
+              fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
+              newEmbed
+              .setDescription(`Voted for meme ${num}, new score: ${newScore}`)
+              .attachFile(`../images/memes/${file.name}.${format.toLowerCase()}`)
+              .setImage(`attachment://${file.name}.${format.toLowerCase()}`)
+              .setTimestamp(new Date())
+              message.channel.send(newEmbed)
+            }
+            else
+            {
+              message.reply("Please send a valid number")
+            }
+          }
+          catch(err) {
+            message.reply("Please send a number.")
+          }
+        }
+        else if (typeof Number(args[0]) === 'number')
+        {
+          var num = Number(args[0])
+          var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
+          if (num >= 0 && num <= images.size)
+          {
+            var file = images.images[num]
+            var format = file.format
+            if (format == "JPEG") {
+              format = "jpg"
+            }
+            newEmbed
+            .setDescription(`Showing meme ${num} with score: ${file.score}`)
+            .attachFile(`../images/memes/${file.name}.${format.toLowerCase()}`)
+            .setImage(`attachment://${file.name}.${format.toLowerCase()}`)
+            .setTimestamp(new Date())
+            message.channel.send(newEmbed)
+          }
+          else
+          {
+            message.reply("Please send a valid number")
+          }
+        }
       }
     },
 };
