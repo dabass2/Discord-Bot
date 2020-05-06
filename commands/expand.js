@@ -5,7 +5,7 @@ module.exports = {
     description: 'For when a string must be expanded',
     execute(message, args, newEmbed) {
         if (args.length === 0)
-            return message.reply(`You didn't give me a string to expand, asshole`);
+            return message.reply(`You didn't give me a string to expand.`);
 
         let numSpacing = args[0]
         let messageToProcess = ''

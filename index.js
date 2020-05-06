@@ -24,23 +24,29 @@ client.on("message", message => {
   const args = message.content.slice(prefix.length).split(' ');
   const cmd = args.shift().toLowerCase();
 
-  if (message.author.bot) return;  //Ignores other bot messages
+  /* Ignores other bots messages */
 
-  /* Bot related commands */
+  if (message.author.bot) return;
 
-  if (message.channel.type === "dm") //Bot sends certain image when Private Messaged
+  /* Bot replies when Direct Messaged */
+
+  if (message.channel.type === "dm")
   {
     if (message.author.bot) return;
     message.reply("Type !help for a list of commands. Or you can dm me :flushed:")
     message.channel.send({files: ['./eggplantmedaddy.gif'] });
   }
 
-  if (message.isMentioned(client.user.id))  //Bot replies when mentioned. Can be expanded on later.
+  /* Bot replies when mentioned. */
+
+  if (message.isMentioned(client.user.id))
   {
     message.reply("Type !help for a list of commands. Or you can dm me :flushed:")
   }
 
-  if (!message.content.startsWith(botconfig.prefix)) return; //Ignores messages without prefix at [0]
+  /* Ignores all messages not starting with the prefix. Must be below previous lines */
+
+  if (!message.content.startsWith(botconfig.prefix)) return;
 
   /* Help command which returns an embed of all bot commands */
 
