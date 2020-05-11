@@ -34,7 +34,7 @@ client.on("message", message => {
   {
     if (message.author.bot) return;
     message.reply("Type !help for a list of commands. Or you can dm me :flushed:")
-    message.channel.send({files: ['./eggplantmedaddy.gif'] });
+    return;
   }
 
   /* Bot replies when mentioned. */

@@ -2,9 +2,12 @@ module.exports = {
     name: 'rmeme',
     description: 'Sends random meme',
     execute(message, args, newEmbed) {
+      const Discord = require("discord.js");
+      newEmbed = new Discord.RichEmbed()
       var fs = require('fs');
       if (args.length === 0)
       {
+
         var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
         var num = Math.floor(images.size * Math.random())
         var file = images.images[num]
@@ -16,28 +19,33 @@ module.exports = {
         }
         newEmbed
         .setDescription(`Random meme #${num} with score: ${score}`)
-        .attachFile(`../images/memes/${file.name}.${format.toLowerCase()}`)
+        .attachFile(`../Discord Bot/images/memes/${file.name}.${format.toLowerCase()}`)
         .setImage(`attachment://${file.name}.${format.toLowerCase()}`)
         .setTimestamp(new Date())
         message.channel.send(newEmbed).then(async sent => {  // async and await so emojis are always sent in order
           await sent.react('✅')
           await sent.react('❌')
-          const filter = (reaction) => {  // look for ✅ or ❌ emoji
-              return reaction.emoji.name === '✅' || reaction.emoji.name === '❌';
+          await sent.react('🔁')
+          const filter = (reaction) => {  // look for ✅ or ❌ emoji or 🔁
+              return reaction.emoji.name === '✅' || reaction.emoji.name === '❌' || reaction.emoji.name === '🔁';
           };
-          sent.awaitReactions(filter, {time: 4000}).then(collect => // four second voting period? maybe more...
-              Promise.all(collect.first().message.reactions.map(itr => { // iterate through and wait for it to finish
+          sent.awaitReactions(filter, {time: 5000}).then(collect =>
+              Promise.all(collect.first().message.reactions.map(itr => {
                 // console.log(itr.emoji.name, itr.emoji.reaction.count)
                 return itr.emoji.reaction.count  // filter ensures only those reacts are logged
               })).then(v => {
+                // console.log(v)
                 let newScore = v[0] - v[1]
-                if (newScore) // just cause I don't want to write if no changes
+                if (newScore)
                 {
-                  file.score += newScore // todo, make it so if it's too fast the scores won't be ignored
-                  // console.log(file.score)
+                  file.score += newScore 
                   fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
                 }
-              }).catch(err => console.log(err)) // once finished write back new score
+                if (v[2] > 1)
+                {
+                  module.exports.execute(message, args, newEmbed)
+                }
+              }).catch(err => console.log(err))
           ).catch(err => {console.log(err)})
         });
       } else if (args.length >= 1) {
