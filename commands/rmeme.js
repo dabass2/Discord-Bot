@@ -1,108 +1,155 @@
 module.exports = {
-    name: 'rmeme',
-    description: 'Sends random meme',
-    execute(message, args, newEmbed) {
-      const Discord = require("discord.js");
-      newEmbed = new Discord.RichEmbed()
-      var fs = require('fs');
+  name: 'rmeme',
+  description: 'Send, vote, upload, or delete memes!',
+  execute(message, args, newEmbed) {
+      const axios = require('axios')
+      const acceptedUsers = ['122090401011073029', '107322097553960960']
       if (args.length === 0)
       {
+        axios.get('http://leinad.pw:9000/rmeme').then((res) => {
+          console.log(res.data)
+          img = res.data
+          newEmbed
+          .setDescription(`Random meme #${img.id} with score: ${img.score}`)
+          .setImage(img.url)
+          .setTimestamp(new Date())
+          message.channel.send(newEmbed).then(async sent => {  // async and await so emojis are always sent in order
+            await sent.react('✅')
+            await sent.react('❌')
+            await sent.react('🔁')
+            const filter = (reaction) => {  // look for ✅ or ❌ emoji or 🔁
+                return reaction.emoji.name === '✅' || reaction.emoji.name === '❌' || reaction.emoji.name === '🔁';
+            };
+            sent.awaitReactions(filter, {time: 5000}).then(collect =>
+                Promise.all(collect.first().message.reactions.map(itr => {
+                  return itr.emoji.reaction.count  // filter ensures only those reacts are logged
+                })).then(reacts => {
+                  let newScore = reacts[0] - reacts[1]
+                  if (newScore)
+                  {
+                    axios.put(`http://leinad.pw:9000/rmeme/${img.id}/up`, {votes: newScore}).then((res) => {
+                        console.log(`Updated meme: ${res.data.id}'s score. New score ${res.data.score}`)
+                    }).catch((err) => {
+                        console.log(err)
+                    })
+                  }
+                  if (reacts[2] > 1)
+                  {
+                    module.exports.execute(message, args, newEmbed)
+                  }
+                }).catch(err => console.log(err))
+            ).catch(err => {console.log(err)})
+          });
+        }).catch((err) => {
+            console.log(err)
+        })
+      } 
 
-        var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
-        var num = Math.floor(images.size * Math.random())
-        var file = images.images[num]
-        console.log(file)
-        var format = file.format  // format should always be jpg, but..
-        var score = file.score
-        if (format == "JPEG") {
-          format = "jpg"
-        }
-        newEmbed
-        .setDescription(`Random meme #${num} with score: ${score}`)
-        .attachFile(`../Discord Bot/images/memes/${file.name}.${format.toLowerCase()}`)
-        .setImage(`attachment://${file.name}.${format.toLowerCase()}`)
-        .setTimestamp(new Date())
-        message.channel.send(newEmbed).then(async sent => {  // async and await so emojis are always sent in order
-          await sent.react('✅')
-          await sent.react('❌')
-          await sent.react('🔁')
-          const filter = (reaction) => {  // look for ✅ or ❌ emoji or 🔁
-              return reaction.emoji.name === '✅' || reaction.emoji.name === '❌' || reaction.emoji.name === '🔁';
-          };
-          sent.awaitReactions(filter, {time: 5000}).then(collect =>
-              Promise.all(collect.first().message.reactions.map(itr => {
-                // console.log(itr.emoji.name, itr.emoji.reaction.count)
-                return itr.emoji.reaction.count  // filter ensures only those reacts are logged
-              })).then(v => {
-                // console.log(v)
-                let newScore = v[0] - v[1]
-                if (newScore)
-                {
-                  file.score += newScore 
-                  fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
+      else if (args.length >= 1) {
+          if ((args[0] === 'up' || args[0] === 'down') && args[1])
+          {
+            try {
+              var max
+              id = Number(args[1])
+              axios.get('http://leinad.pw:9000/rmeme/memes/total').then((res) => {
+                max = res.data.total
+                if (id >= 0 && id < max)
+                { 
+                  axios.put(`http://leinad.pw:9000/rmeme/${id}/${args[0]}`, {votes: 1}).then((res) => {
+                    var img = res.data
+                    newEmbed
+                    .setDescription(`Voted for meme ${img.id}, new score: ${img.score}`)
+                    .setImage(img.url)
+                    .setTimestamp(new Date())
+                    return message.channel.send(newEmbed)
+                  }).catch((err) => {
+                    console.log(err)
+                  })
                 }
-                if (v[2] > 1)
-                {
-                  module.exports.execute(message, args, newEmbed)
-                }
-              }).catch(err => console.log(err))
-          ).catch(err => {console.log(err)})
-        });
-      } else if (args.length >= 1) {
-        if ((args[0] === 'upvote' || args[0] === 'downvote') && args[1])
-        {
-          try {
-            var num = Number(args[1])
-            var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
-            if (num >= 0 && num <= images.size)
+              }).catch((err) => {
+                console.log(err)
+              })
+            } catch(err) {
+              console.log(err)
+              message.channel.reply("Please send a valid number.")
+            }
+          }
+          else if (args[0] === 'upload')
+          {
+            if (!acceptedUsers.includes(message.author.id))
             {
-              var file = images.images[num]
-              var format = file.format
-              if (format == "JPEG") {
-                format = "jpg"
-              }
-              var newScore = args[0] === 'upvote' ? file.score + 1 : file.score - 1 
-              file.score = newScore
-              fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
-              newEmbed
-              .setDescription(`Voted for meme ${num}, new score: ${newScore}`)
-              .attachFile(`../images/memes/${file.name}.${format.toLowerCase()}`)
-              .setImage(`attachment://${file.name}.${format.toLowerCase()}`)
-              .setTimestamp(new Date())
-              message.channel.send(newEmbed)
+              message.channel.send("You do not have access to this command.")
             }
             else
             {
-              message.reply("Please send a valid number")
+              axios.post(`http://leinad.pw:9000/rmeme/create`, {url: args[1]}).then((res) => {
+                var img = res.data
+                console.log(res)
+                newEmbed
+                .setDescription(`Created meme ${img.id}, with score: ${img.score}`)
+                .setImage(img.url)
+                .setTimestamp(new Date())
+                return message.channel.send(newEmbed)
+              }).catch((err) => {
+                message.channel.send('Error uploading image.')
+              })
             }
           }
-          catch(err) {
-            message.reply("Please send a number.")
-          }
-        }
-        else if (typeof Number(args[0]) === 'number')
-        {
-          var num = Number(args[0])
-          var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
-          if (num >= 0 && num <= images.size)
+          else if (args[0] === 'delete')
           {
-            var file = images.images[num]
-            var format = file.format
-            if (format == "JPEG") {
-              format = "jpg"
+            if (!acceptedUsers.includes(message.author.id))
+            {
+              message.channel.send("You do not have access to this command.")
             }
-            newEmbed
-            .setDescription(`Showing meme ${num} with score: ${file.score}`)
-            .attachFile(`../images/memes/${file.name}.${format.toLowerCase()}`)
-            .setImage(`attachment://${file.name}.${format.toLowerCase()}`)
-            .setTimestamp(new Date())
-            message.channel.send(newEmbed)
+            else
+            {
+              try {
+                var max
+                id = Number(args[1])
+                axios.get('http://leinad.pw:9000/rmeme/memes/total').then((res) => {
+                  max = res.data.total
+                  if (id >= 0 && id < max)
+                  { 
+                    axios.delete(`http://leinad.pw:9000/rmeme/del/${args[1]}`).then((res) => {
+                      message.channel.send(res.data)
+                    }).catch((err) => {
+                      console.log(err)
+                    })
+                  }
+                }).catch((err) => {
+                  console.log(err)
+                })
+              } catch(err) {
+                console.log(err)
+                message.channel.reply("Please send a valid number.")
+              }
+            }
           }
-          else
+          else if (typeof Number(args[0]) === 'number')
           {
-            message.reply("Please send a valid number")
+            var id = Number(args[0])
+            axios.get('http://leinad.pw:9000/rmeme/memes/total').then((res) => {
+              max = res.data.total
+              if (id >= 0 && id < max)
+              { 
+                axios.get(`http://leinad.pw:9000/rmeme/${id}`).then((res) => {
+                  var img = res.data
+                  newEmbed
+                  .setDescription(`Showing meme ${img.id}, with score: ${img.score}`)
+                  .setImage(img.url)
+                  .setTimestamp(new Date())
+                  return message.channel.send(newEmbed)
+                }).catch((err) => {
+                  console.log(err)
+                })
+              }
+              else
+              {
+                message.reply("Please send a valid number")
+              }
+            }).catch((err) => {
+              console.log(err)
+            })
           }
-        }
-      }
-    },
-};
+      }  
+}}

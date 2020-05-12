@@ -12,32 +12,28 @@ module.exports = {
       // !anime (posts rand image)
       if (args.length === 0)
       {
-        const words = ["cool", "funny", "food", "scenery", "", "animation", "cute", "purple"]
+        const words = ["cool", "funny", "food", "scenery", "", "animation", "cute", "purple", "smart"]
 
-        function getImage(message)
-        {
+        var Scraper = require('images-scraper');  // too slow, need to change
+ 
+        const google = new Scraper({
+          puppeteer: {
+            headless: true,
+          }
+        });
+        
+        (async () => {
           const adjective = words[Math.floor(Math.random() * Math.floor(words.length))]
           const keyword = `anime ${adjective}`
-          var Scraper = require('images-scraper')
-              bing = new Scraper.Bing();
-          bing.list({
-              keyword: keyword,
-              num: 25,
-              detail: true
-          })
-          .then(function(res) {
-              var randIndex = Math.floor(Math.random() * Math.floor(res.length))
-              newEmbed
-              .setColor(0x32CD32)
-              .setImage(res[randIndex].url)
-              .setTimestamp(new Date())
-              message.channel.send(newEmbed);
-              console.log("Sent anime message with keyword: ", keyword)
-          }).catch((err) => {
-            console.log(err)
-          })
-        }
-        getImage(message)
+          const results = await google.scrape(keyword, 50);
+          const answer = results[Math.floor(Math.random() * Math.floor(results.length))].url
+          newEmbed
+          .setColor(0x32CD32)
+          .setImage(answer)
+          .setTimestamp(new Date())
+          message.channel.send(newEmbed);
+          console.log("Sent anime message with keyword: ", keyword)
+        })();
       }
     }
     // console.log(args[0])
