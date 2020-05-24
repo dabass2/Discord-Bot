@@ -33,15 +33,16 @@ client.on("message", message => {
   if (message.channel.type === "dm")
   {
     if (message.author.bot) return;
-    message.reply("Type !help for a list of commands. Or you can dm me :flushed:")
-    return;
+    if (!message.content.startsWith(botconfig.prefix)) {
+      message.reply("Type !help for a list of commands.")
+    }
   }
 
   /* Bot replies when mentioned. */
 
   if (message.isMentioned(client.user.id))
   {
-    message.reply("Type !help for a list of commands. Or you can dm me :flushed:")
+    message.reply("Type !help for a list of commands.")
   }
 
   /* Ignores all messages not starting with the prefix. Must be below previous lines */
@@ -59,11 +60,11 @@ client.on("message", message => {
     .setThumbnail(usrPic)
     .setDescription('tfw: List of Commands')
     .setTimestamp(new Date())
-    .addField('!help', 'This command! Prints list of commands.')
+    .addField(`${botconfig.prefix}help', 'This command. Prints list of commands.`)
     client.commands.forEach(cmd => {
-      newEmbed.addField(`!${cmd.name}`, cmd.description)
+      newEmbed.addField(`${botconfig.prefix}${cmd.name}`, cmd.description)
     })
-    message.channel.send(newEmbed)
+    message.author.send(newEmbed)
   }
 
   /* Commands with separate files for their code */

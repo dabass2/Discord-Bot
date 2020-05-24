@@ -3,7 +3,9 @@ module.exports = {
   description: 'Send, vote, upload, or delete memes!',
   execute(message, args, newEmbed) {
       const axios = require('axios')
-      const acceptedUsers = ['122090401011073029', '107322097553960960']
+      const botconfig = require("../botconfig.json");
+      const acceptedUsers = ['122090401011073029']
+
       if (args.length === 0)
       {
         axios.get('http://leinad.pw:9000/rmeme').then((res) => {
@@ -27,7 +29,7 @@ module.exports = {
                   let newScore = reacts[0] - reacts[1]
                   if (newScore)
                   {
-                    axios.put(`http://leinad.pw:9000/rmeme/${img.id}/up`, {votes: newScore}).then((res) => {
+                    axios.put(`http://leinad.pw:9000/rmeme/${img.id}/up`, {votes: newScore, token: botconfig.apiToken}).then((res) => {
                         console.log(`Updated meme: ${res.data.id}'s score. New score ${res.data.score}`)
                     }).catch((err) => {
                         console.log(err)
@@ -55,7 +57,7 @@ module.exports = {
                 max = res.data.total
                 if (id >= 0 && id < max)
                 { 
-                  axios.put(`http://leinad.pw:9000/rmeme/${id}/${args[0]}`, {votes: 1}).then((res) => {
+                  axios.put(`http://leinad.pw:9000/rmeme/${id}/${args[0]}`, {votes: 1, token: botconfig.apiToken}).then((res) => {
                     var img = res.data
                     newEmbed
                     .setDescription(`Voted for meme ${img.id}, new score: ${img.score}`)
@@ -82,7 +84,7 @@ module.exports = {
             }
             else
             {
-              axios.post(`http://leinad.pw:9000/rmeme/create`, {url: args[1]}).then((res) => {
+              axios.post(`http://leinad.pw:9000/rmeme/create`, {url: args[1], token: botconfig.apiToken}).then((res) => {
                 var img = res.data
                 console.log(res)
                 newEmbed
@@ -110,7 +112,7 @@ module.exports = {
                   max = res.data.total
                   if (id >= 0 && id < max)
                   { 
-                    axios.delete(`http://leinad.pw:9000/rmeme/del/${args[1]}`).then((res) => {
+                    axios.delete(`http://leinad.pw:9000/rmeme/del/${args[1]}`, {data: {token:botconfig.apiToken}}).then((res) => {
                       message.channel.send(res.data)
                     }).catch((err) => {
                       console.log(err)
