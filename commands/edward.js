@@ -2,7 +2,7 @@ module.exports = {
     name: 'edward',
     description: 'Sends a picture of our lord',
     execute(message, args, newEmbed) {
-      const directory = '../../var/www/leinad.pw/html/images/edward/';
+      const directory = '/var/www/leinad/html/images/edward/';
       const fs = require('fs');
       let imgArray = []
 
