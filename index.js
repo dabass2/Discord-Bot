@@ -15,7 +15,7 @@ for (const file of commandFiles) {
 
 client.on("ready", () => {
   console.log(`${client.user.username} is online`);
-  client.user.setActivity("Hunie Pop");
+  client.user.setActivity("League of Maidens");
 });
 
 client.on("message", message => {
@@ -34,7 +34,7 @@ client.on("message", message => {
   {
     if (message.author.bot) return;
     if (!message.content.startsWith(botconfig.prefix)) {
-      message.reply("Type !help for a list of commands.")
+      message.reply("Hi! : ) Type !help for a list of commands.")
     }
   }
 
@@ -42,7 +42,7 @@ client.on("message", message => {
 
   if (message.isMentioned(client.user.id))
   {
-    message.reply("Type !help for a list of commands.")
+    message.reply("Hi! : ) Type !help for a list of commands.")
   }
 
   /* Ignores all messages not starting with the prefix. Must be below previous lines */

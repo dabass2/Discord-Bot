@@ -5,10 +5,11 @@ module.exports = {
       const axios = require('axios')
       const botconfig = require("../botconfig.json");
       const acceptedUsers = ['122090401011073029']
+      const url = 'https://api.rmeme.me/rmeme'
 
       if (args.length === 0)
       {
-        axios.get('http://leinad.pw:9000/rmeme').then((res) => {
+        axios.get(`${url}`).then((res) => {
           console.log(res.data)
           img = res.data
           newEmbed
@@ -16,20 +17,20 @@ module.exports = {
           .setImage(img.url)
           .setTimestamp(new Date())
           message.channel.send(newEmbed).then(async sent => {  // async and await so emojis are always sent in order
-            await sent.react('✅')
-            await sent.react('❌')
-            await sent.react('🔁')
-            const filter = (reaction) => {  // look for ✅ or ❌ emoji or 🔁
+            await sent.react('✅')  // god you're so cool Daniel
+            await sent.react('❌')  // thanks Daniel that means a lot
+            await sent.react('🔁')  // no problem Daniel, not enough people have seen this asyc/await
+            const filter = (reaction) => {  // look for ✅ , ❌ , or 🔁
                 return reaction.emoji.name === '✅' || reaction.emoji.name === '❌' || reaction.emoji.name === '🔁';
             };
             sent.awaitReactions(filter, {time: 5000}).then(collect =>
                 Promise.all(collect.first().message.reactions.map(itr => {
-                  return itr.emoji.reaction.count  // filter ensures only those reacts are logged
+                  return itr.emoji.reaction.count
                 })).then(reacts => {
                   let newScore = reacts[0] - reacts[1]
                   if (newScore)
                   {
-                    axios.put(`http://leinad.pw:9000/rmeme/${img.id}/up`, {votes: newScore, token: botconfig.apiToken}).then((res) => {
+                    axios.put(`${url}/${img.id}/up`, {votes: newScore, token: botconfig.apiToken}).then((res) => {
                         console.log(`Updated meme: ${res.data.id}'s score. New score ${res.data.score}`)
                     }).catch((err) => {
                         console.log(err)
@@ -53,11 +54,11 @@ module.exports = {
             try {
               var max
               id = Number(args[1])
-              axios.get('http://leinad.pw:9000/rmeme/memes/total').then((res) => {
+              axios.get(`${url}/memes/total`).then((res) => {
                 max = res.data.total
                 if (id >= 0 && id < max)
                 { 
-                  axios.put(`http://leinad.pw:9000/rmeme/${id}/${args[0]}`, {votes: 1, token: botconfig.apiToken}).then((res) => {
+                  axios.put(`${url}/${id}/${args[0]}`, {votes: 1, token: botconfig.apiToken}).then((res) => {
                     var img = res.data
                     newEmbed
                     .setDescription(`Voted for meme ${img.id}, new score: ${img.score}`)
@@ -84,7 +85,7 @@ module.exports = {
             }
             else
             {
-              axios.post(`http://leinad.pw:9000/rmeme/create`, {url: args[1], token: botconfig.apiToken}).then((res) => {
+              axios.post(`${url}/create`, {url: args[1], token: botconfig.apiToken}).then((res) => {
                 var img = res.data
                 console.log(res)
                 newEmbed
@@ -108,11 +109,11 @@ module.exports = {
               try {
                 var max
                 id = Number(args[1])
-                axios.get('http://leinad.pw:9000/rmeme/memes/total').then((res) => {
+                axios.get(`${url}/memes/total`).then((res) => {
                   max = res.data.total
                   if (id >= 0 && id < max)
                   { 
-                    axios.delete(`http://leinad.pw:9000/rmeme/del/${args[1]}`, {data: {token:botconfig.apiToken}}).then((res) => {
+                    axios.delete(`${url}/del/${args[1]}`, {data: {token:botconfig.apiToken}}).then((res) => {
                       message.channel.send(res.data)
                     }).catch((err) => {
                       console.log(err)
@@ -130,11 +131,11 @@ module.exports = {
           else if (typeof Number(args[0]) === 'number')
           {
             var id = Number(args[0])
-            axios.get('http://leinad.pw:9000/rmeme/memes/total').then((res) => {
+            axios.get(`${url}/memes/total`).then((res) => {
               max = res.data.total
               if (id >= 0 && id < max)
               { 
-                axios.get(`http://leinad.pw:9000/rmeme/${id}`).then((res) => {
+                axios.get(`${url}/${id}`).then((res) => {
                   var img = res.data
                   newEmbed
                   .setDescription(`Showing meme ${img.id}, with score: ${img.score}`)
