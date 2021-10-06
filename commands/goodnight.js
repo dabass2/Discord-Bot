@@ -10,6 +10,7 @@ module.exports = {
             .setThumbnail("https://i.imgur.com/miGCppP.gif")
             .setImage("https://i.imgur.com/miGCppP.gif")
             .setAuthor(message.author.username, "https://i.imgur.com/miGCppP.gif")
+            .setFooter("🥺", "https://i.imgur.com/miGCppP.gif")
             return message.channel.send(newEmbed);
         } else { // 80% chance
             newEmbed
