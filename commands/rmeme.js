@@ -6,12 +6,16 @@ module.exports = {
       const botconfig = require("../botconfig.json");
       const acceptedUsers = ['122090401011073029']
       const url = 'https://api.rmeme.me/rmeme'
+      // const url = 'http://localhost:9000/rmeme'
 
       if (args.length === 0)
       {
         axios.get(`${url}`).then((res) => {
-          console.log(res.data)
+          console.log(res.data.format)
           img = res.data
+          if (img.format === 'mp4') {
+              message.channel.send(img.url)
+          }
           newEmbed
           .setDescription(`Random meme #${img.id} with score: ${img.score}`)
           .setImage(img.url)
@@ -137,6 +141,10 @@ module.exports = {
               { 
                 axios.get(`${url}/${id}`).then((res) => {
                   var img = res.data
+                  console.log(img)
+                  if (img.format === 'mp4') {
+                    return message.channel.send(img.url)
+                  }
                   newEmbed
                   .setDescription(`Showing meme ${img.id}, with score: ${img.score}`)
                   .setImage(img.url)
