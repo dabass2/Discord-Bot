@@ -34,7 +34,7 @@ client.on("message", message => {
   {
     if (message.author.bot) return;
     if (!message.content.startsWith(botconfig.prefix)) {
-      message.reply("Hi! : ) Type !help for a list of commands.")
+      return
     }
   }
 
@@ -42,7 +42,9 @@ client.on("message", message => {
 
   if (message.isMentioned(client.user.id))
   {
-    message.reply("Hi! : ) Type !help for a list of commands.")
+    let newEmbed = new Discord.RichEmbed()
+    .setImage("https://media.discordapp.net/attachments/193423263387353088/902063280615485480/Wokege.gif")
+    message.reply(newEmbed)
   }
 
   /* Ignores all messages not starting with the prefix. Must be below previous lines */
@@ -55,7 +57,7 @@ client.on("message", message => {
   {
     client.commands.get(cmd)
     let usrPic = client.user.displayAvatarURL
-    var newEmbed = new Discord.RichEmbed()
+    let newEmbed = new Discord.RichEmbed()
     .setColor(0x4286f4)
     .setThumbnail(usrPic)
     .setDescription('tfw: List of Commands')
