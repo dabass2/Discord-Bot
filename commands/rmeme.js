@@ -4,7 +4,7 @@ module.exports = {
   execute(message, args, newEmbed) {
       const axios = require('axios')
       const botconfig = require("../botconfig.json");
-      const acceptedUsers = ['122090401011073029']
+      const acceptedUsers = ['122090401011073029', '109685953911590912']
       const url = 'https://api.rmeme.me/rmeme'
       // const url = 'http://localhost:9000/rmeme'
 
@@ -13,14 +13,18 @@ module.exports = {
         axios.get(`${url}`).then((res) => {
           console.log(res.data.format)
           img = res.data
-          if (img.format === 'mp4') {
-              message.channel.send(img.url)
+          let sentMessage   // if this works I'll shit
+          if (img.format === 'mp4' || img.format === 'mov' || img.format === 'webm') {
+              console.log(img.url)
+              sentMessage = message.channel.send(img.url)
+          } else {
+              newEmbed
+              .setDescription(`Random meme #${img.id} with score: ${img.score}`)
+              .setImage(img.url)
+              .setTimestamp(new Date())
+              sentMessage = message.channel.send(newEmbed)
           }
-          newEmbed
-          .setDescription(`Random meme #${img.id} with score: ${img.score}`)
-          .setImage(img.url)
-          .setTimestamp(new Date())
-          message.channel.send(newEmbed).then(async sent => {  // async and await so emojis are always sent in order
+          sentMessage.then(async sent => {  // async and await so emojis are always sent in order
             await sent.react('✅')  // god you're so cool Daniel
             await sent.react('❌')  // thanks Daniel that means a lot
             await sent.react('🔁')  // no problem Daniel, not enough people have seen this asyc/await
