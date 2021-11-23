@@ -1,16 +1,18 @@
 const fs = require('fs');
 const Discord = require("discord.js");
-const botconfig = require("./botconfig.json");
+const botconfig = require("../botconfig.json");
 
-const client = new Discord.Client();
+const botIntents = new Discord.Intents()
+botIntents.add(Discord.Intents.FLAGS.GUILD_MESSAGES)
+const client = new Discord.Client({ intents: botIntents });
 client.commands = new Discord.Collection();
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const commandFiles = fs.readdirSync('../commands').filter(file => file.endsWith('.js'));
 
 var cmdArr = []
 for (const file of commandFiles) {
-    const command = require(`./commands/${file}`);
-    cmdArr.push(command.name)
-    client.commands.set(command.name, command);
+    const command = require(`../commands/${file}`);
+    cmdArr.push(command.data.name)
+    client.commands.set(command.data.name, command);
 }
 
 client.on("ready", () => {
@@ -18,7 +20,23 @@ client.on("ready", () => {
   client.user.setActivity("League of Maidens");
 });
 
-client.on("message", message => {
+client.on('interactionCreate', async interaction => {
+	if (!interaction.isCommand()) return;
+
+	const command = client.commands.get(interaction.commandName);
+
+	if (!command) return;
+
+	try {
+    const cmdEmbed = new Discord.MessageEmbed()
+		await command.execute(interaction, cmdEmbed);
+	} catch (error) {
+		console.error(error);
+		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+	}
+});
+
+client.on("messageCreate", message => {
   /* Message Handling */
   let prefix = botconfig.prefix;
   const args = message.content.slice(prefix.length).split(' ');
@@ -27,16 +45,6 @@ client.on("message", message => {
   /* Ignores other bots messages */
 
   if (message.author.bot) return;
-
-  /* Bot replies when Direct Messaged */
-
-  if (message.channel.type === "dm")
-  {
-    if (message.author.bot) return;
-    if (!message.content.startsWith(botconfig.prefix)) {
-      return
-    }
-  }
 
   /* Bot replies when mentioned. */
 
