@@ -14,6 +14,7 @@ module.exports = {
             .addField('Username', user.username)
             .addField('Tag', user.tag)
             .addField('ID', user.id)
+            .addField('Joined on', new Date(interaction.member.joinedTimestamp).toString())
             .addField('User Created on', new Date(user.createdAt).toString())
         await interaction.reply({ embeds: [msgEmbed] })
     }
