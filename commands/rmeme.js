@@ -1,246 +1,255 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageActionRow, MessageButton } = require('discord.js');
+const { MessageActionRow, MessageButton, MessageEmbed } = require('discord.js');
 const axios = require('axios')
 const botconfig = require("../botconfig.json");
 
-function post_buttons(post_id) {
+const acceptedUsers = ['122090401011073029', '109685953911590912']
+const api_url = 'https://api.rmeme.me/rmeme'
+
+function create_buttons(repeat_dsbl=false) {
     return new MessageActionRow()
         .addComponents(
             new MessageButton()
-                .setCustomId(`up:${post_id}`)
+                .setCustomId('up')
                 .setStyle('SUCCESS')
                 .setEmoji('✔️'),
             new MessageButton()
-                .setCustomId(`down:${post_id}`)
+                .setCustomId('down')
                 .setStyle('DANGER')
                 .setEmoji('✖️'),
-            new MessageButton()
-                .setCustomId(`repeat:${post_id}`)
-                .setStyle('SECONDARY')
-                .setEmoji('🔁')
+            // Break glass in case of will power
+            // new MessageButton()
+            //     .setCustomId('repeat')
+            //     .setDisabled(repeat_dsbl)
+            //     .setStyle('SECONDARY')
+            //     .setEmoji('🔁')
         );
+}
+
+function update_score(post_id, post_action, score) {
+    return new Promise((resolve, reject) => {
+        axios.put(`${api_url}/${post_id}/${post_action}`, {votes: score, token: botconfig.apiToken})
+            .then((res) => {
+                resolve(res)
+            })
+            .catch((err) => {
+                reject(err)
+            })
+    })
+}
+
+async function create_message(interaction, post_id='', post_action='', repeat_dsbl=false, not_visible=false) {
+    return new Promise((resolve, reject) => {
+        let post_url = api_url
+        if (post_id) {
+            post_url += `/${post_id}`
+        }
+        
+        if (post_action) {
+            post_url += `/${post_action}`
+        }
+
+        axios.get(post_url)
+            .then(async res => {
+                let post = res.data
+
+                const videos = ['mp4', 'mov', 'webm']
+                if (videos.includes(post.format)) {
+                    let msg = `Meme #${post.id} with score: ${post.score}\n${post.url}`
+                    await interaction.reply({ content: msg, components: [create_buttons()], ephemeral: not_visible })
+                } else {
+                    let msgEmbed = new MessageEmbed()
+                        .setDescription(`Meme #${post.id} with score: ${post.score}`)
+                        .setImage(post.url)
+                        .setTimestamp(new Date())
+                    await interaction.reply({ embeds: [msgEmbed], components: [create_buttons()], ephemeral: not_visible })
+                }
+
+                let validIds = ['up', 'down', 'repeat']
+                const filter = i => validIds.includes(i.customId);
+
+                const collector = interaction.channel.createMessageComponentCollector({ filter, time: 5000 });
+
+                let score = 0
+                let repeat = false
+                let upvoters = []
+                let downvoters = []
+                collector.on('collect', async i => {
+                    let button_action = i.customId
+                    let voter = i.user.id
+                    if (button_action === "up" && !upvoters.includes(voter)) {
+                        if (downvoters.includes(voter)) {
+                            let idx = downvoters.indexOf(voter)
+                            downvoters.splice(idx, 1)
+                        } else {
+                            upvoters.push(voter)
+                        }
+
+                        score += 1
+                    } else if (button_action === "down" && !downvoters.includes(voter)) {
+                        if (upvoters.includes(voter)) {
+                            let idx = upvoters.indexOf(voter)
+                            upvoters.splice(idx, 1)
+                        } else {
+                            downvoters.push(voter)
+                        }
+
+                        score -= 1
+                    }
+
+                    if (button_action === "repeat") {
+                        repeat = repeat ? false : true
+                    }
+
+                    // Do this so button will exit loading state
+                    await i.update({ components: [create_buttons(repeat_dsbl)] })
+                });
+
+                collector.on('end', () => {
+                    if (score === 0) {
+                        resolve(repeat)
+                    }
+
+                    /*
+                        The rmeme API is poorly designed and requires both scores to
+                        be sent to different endpoints. First, get the action if one not
+                        given, and then send |score| because negatives are NOT supported
+                    */
+                    let action
+                    if (post_action) {
+                        action = post_action
+                    } else {
+                        action = (score > 0) ? "up" : "down"
+                    }
+
+                    update_score(post.id, action, Math.abs(score))
+                        .then(async () => {
+                            let updatedEmbed = new MessageEmbed()
+                                .setDescription(`Meme #${post.id} with score: ${post.score + score}`)
+                                .setImage(post.url)
+                                .setTimestamp(new Date())
+                            await interaction.editReply({ embeds: [updatedEmbed], ephemeral: not_visible })
+                            resolve(repeat)
+                        })
+                        .catch(err => {
+                            reject(err)
+                        })
+                });
+            })
+            .catch(async err => {
+                await interaction.reply({ content: "Invalid meme ID. Please try again.", ephemeral: not_visible })
+                reject(err.data)
+            })
+    })
+}
+
+async function upload_post(interaction, upload_url) {
+    return new Promise((resolve, reject) => {
+        axios.post(`${api_url}/create`, {url: upload_url, token: botconfig.apiToken})
+            .then(async (res) => {
+                let post = res.data
+
+                const videos = ['mp4', 'mov', 'webm']
+                if (videos.includes(post.format)) {
+                    let msg = `Meme #${post.id} with score: ${post.score}\n${post.url}`
+                    await interaction.reply({ content: msg, components: [create_buttons()], ephemeral: not_visible })
+                } else {
+                    let msgEmbed = new MessageEmbed()
+                        .setDescription(`Meme #${post.id} with score: ${post.score}`)
+                        .setImage(post.url)
+                        .setTimestamp(new Date())
+                    await interaction.reply({ embeds: [msgEmbed], components: [create_buttons()], ephemeral: not_visible })
+                }
+                resolve()
+            }).catch((err) => {
+                reject(err)
+            })
+    })
+}
+
+async function update_post(interaction, post_id, post_action) {
+    return new Promise((resolve, reject) => {
+        axios.put(`${api_url}/${post_id}/${post_action}`, {votes: 1, token: botconfig.apiToken})
+            .then(async (res) => {
+                await interaction.reply({ content: `Updated score for meme ${post_id}. New score: ${res.data.score}.` })
+                resolve()
+            })
+            .catch((err) => {
+                reject(err)
+            })
+    })
+}
+
+async function delete_post(interaction, post_id) {
+    return new Promise((resolve, reject) => {
+        axios.delete(`${api_url}/del/${post_id}`, {data: {token:botconfig.apiToken}})
+            .then(async (res) => {
+                await interaction.reply({ content: `Deleted meme ${post_id}.` })
+                resolve()
+            })
+            .catch((err) => {
+                reject(err)
+            })
+    })
 }
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('rmeme')
         .setDescription('Send, vote, upload, or delete memes!')
-        .addNumberOption(str_option =>
-            str_option.setName('post_id')
+        .addSubcommand(getSubCmd =>
+            getSubCmd.setName('get')
                 .setDescription('Select a specific meme to view and/or vote on.')
+                .addNumberOption(num_opt =>
+                    num_opt.setName('id')
+                        .setDescription("Select a specific meme to view and/or vote on.")
+                )
+                .addStringOption(vote_opt =>
+                    vote_opt.setName('action')
+                        .setDescription('Upvote, Downvote, or Delete a post')
+                        .addChoice('up', 'up')
+                        .addChoice('down', 'down')
+                        .addChoice('delete', 'delete')
+                )
         )
-        .addStringOption(vote_option =>
-            vote_option.setName('vote_action')
-                .setDescription('Upvote, Downvote, or Delete a post')
-                .addChoice('Up', 'vote_up')
-                .addChoice('Down', 'vote_down')
-                .addChoice('Delete', 'post_delete')
+        .addSubcommand(upldSubCmd =>
+            upldSubCmd.setName('upload')
+                .setDescription('Upload a new meme.')
+                .addStringOption(url_opt =>
+                    url_opt.setName('url')
+                        .setDescription('The url of the post to be uploaded')
+                        .setRequired(true)
+                )
         ),
-    async execute(interaction, msgEmbed, client) {
-        const acceptedUsers = ['122090401011073029', '109685953911590912']
-        const url = 'https://api.rmeme.me/rmeme'
-  
-        const post_id = interaction.options.getNumber('post_id')
-        const post_action = interaction.options.getString('vote_action')
+    async execute(interaction) {  
+        const post_id = interaction.options.getNumber('id')
+        const post_action = interaction.options.getString('action')
+        const upload_url = interaction.options.getString('url')
 
-        /* No post ID given, so send a random meme. */
-        if (!post_id && !post_action) {
-            axios.get(url)
-                .then(async res => {
-                    let post = res.data
-
-                    const videos = ['mp4', 'mov', 'webm']
-                    if (videos.includes(post.format)) {
-                        console.log('video')
+        try {
+            if (interaction.options.getSubcommand() === 'upload' && upload_url) {
+                if (acceptedUsers.includes(interaction.user.id)) {
+                    await upload_post(interaction, upload_url)
+                } else {
+                    await interaction.reply({ content: "You cannot use this command.", ephemeral: true })
+                }
+            } else if (interaction.options.getSubcommand() === 'get') {
+                if (!post_id && !post_action) {         // Nothing given, send random meme
+                    await create_message(interaction)
+                } else if (post_id && !post_action) {   // Just post ID, try to send whatever was requested
+                    await create_message(interaction, post_id, null, true)
+                } else if (post_id && post_action) {    // Could be voting up/down or deleting a post
+                    if (post_action === "delete" && acceptedUsers.includes(interaction.user.id)) {
+                        await delete_post(interaction, post_id)
+                    } else if (post_action === "up" || post_action === "down") {
+                        await update_post(interaction, post_id, post_action, true)
                     } else {
-                        msgEmbed
-                            .setDescription(`Meme #${post.id} with score: ${post.score}`)
-                            .setImage(post.url)
-                            .setTimestamp(new Date())
-                        await interaction.reply({ embeds: [msgEmbed], components: [post_buttons(post.id)] })
-
-                        client.on('interactionCreate', interaction => {
-                            if (!interaction.isButton()) return
-                            // console.log(interaction.customId.split(":"))
-                            let button_action = interaction.customId.split(":")[0]
-                            let post_id = interaction.customId.split(":")[1]
-
-                            /*
-                            if button_action === repeat
-                                run again
-                            else
-                                let score
-                                if button_action === up : score + 1
-                                if button_action === down : score - 1
-                                axios.post(url+post_id, score)
-                            */
-                        })
+                        await interaction.reply({ content: "You cannot use this command.", ephemeral: true })
                     }
-                })
-                .catch(async err => {
-                    console.error(err)
-                    return new Error("Failed to fetch meme.")
-                })
+                }
+            }
+        } catch(err) {
+            return new Error(err)
         }
     }
 }
-        // if (!post_id && !post_action) {
-        //   axios.get(`${url}`).then((res) => {
-        //     img = res.data
-        //     let sentMessage
-        //     if (img.format === 'mp4' || img.format === 'mov' || img.format === 'webm') {
-        //         console.log(img.url)
-        //         sentMessage = message.channel.send(img.url)
-        //     } else {
-        //         newEmbed
-                // .setDescription(`Random meme #${img.id} with score: ${img.score}`)
-                // .setImage(img.url)
-                // .setTimestamp(new Date())
-        //         sentMessage = message.channel.send(newEmbed)
-        //     }
-        //     sentMessage.then(async sent => {
-        //       await sent.react('✅')
-        //       await sent.react('❌')
-        //       await sent.react('🔁')
-        //       const filter = (reaction) => {
-        //           return reaction.emoji.name === '✅' || reaction.emoji.name === '❌' || reaction.emoji.name === '🔁';
-        //       };
-        //       sent.awaitReactions(filter, {time: 5000}).then(collect =>
-        //           Promise.all(collect.first().message.reactions.map(itr => {
-        //             return itr.emoji.reaction.count
-        //           })).then(reacts => {
-        //             let newScore = reacts[0] - reacts[1]
-        //             if (newScore)
-        //             {
-        //               axios.put(`${url}/${img.id}/up`, {votes: newScore, token: botconfig.apiToken}).then((res) => {
-        //                   console.log(`Updated meme: ${res.data.id}'s score. New score ${res.data.score}`)
-        //               }).catch((err) => {
-        //                   console.log(err)
-        //               })
-        //             }
-        //             if (reacts[2] > 1)
-        //             {
-        //               module.exports.execute(message, args, newEmbed)
-        //             }
-        //           }).catch(err => console.log(err))
-        //       ).catch(err => {console.log(err)})
-        //     });
-        //   }).catch((err) => {
-        //       console.log(err)
-        //   })
-        // } 
-  
-        // else if (args.length >= 1) {
-        //     if ((args[0] === 'up' || args[0] === 'down') && args[1])
-        //     {
-        //       try {
-        //         var max
-        //         id = Number(args[1])
-        //         axios.get(`${url}/memes/total`).then((res) => {
-        //           max = res.data.total
-        //           if (id >= 0 && id < max)
-        //           { 
-        //             axios.put(`${url}/${id}/${args[0]}`, {votes: 1, token: botconfig.apiToken}).then((res) => {
-        //               var img = res.data
-        //               newEmbed
-        //               .setDescription(`Voted for meme ${img.id}, new score: ${img.score}`)
-        //               .setImage(img.url)
-        //               .setTimestamp(new Date())
-        //               return message.channel.send(newEmbed)
-        //             }).catch((err) => {
-        //               console.log(err)
-        //             })
-        //           }
-        //         }).catch((err) => {
-        //           console.log(err)
-        //         })
-        //       } catch(err) {
-        //         console.log(err)
-        //         message.channel.reply("Please send a valid number.")
-        //       }
-        //     }
-        //     else if (args[0] === 'upload')
-        //     {
-        //       if (!acceptedUsers.includes(message.author.id))
-        //       {
-        //         message.channel.send("You do not have access to this command.")
-        //       }
-        //       else
-        //       {
-        //         axios.post(`${url}/create`, {url: args[1], token: botconfig.apiToken}).then((res) => {
-        //           var img = res.data
-        //           console.log(res)
-        //           newEmbed
-        //           .setDescription(`Created meme ${img.id}, with score: ${img.score}`)
-        //           .setImage(img.url)
-        //           .setTimestamp(new Date())
-        //           return message.channel.send(newEmbed)
-        //         }).catch((err) => {
-        //           message.channel.send('Error uploading image.')
-        //         })
-        //       }
-        //     }
-        //     else if (args[0] === 'delete')
-        //     {
-        //       if (!acceptedUsers.includes(message.author.id))
-        //       {
-        //         message.channel.send("You do not have access to this command.")
-        //       }
-        //       else
-        //       {
-        //         try {
-        //           var max
-        //           id = Number(args[1])
-        //           axios.get(`${url}/memes/total`).then((res) => {
-        //             max = res.data.total
-        //             if (id >= 0 && id < max)
-        //             { 
-        //               axios.delete(`${url}/del/${args[1]}`, {data: {token:botconfig.apiToken}}).then((res) => {
-        //                 message.channel.send(res.data)
-        //               }).catch((err) => {
-        //                 console.log(err)
-        //               })
-        //             }
-        //           }).catch((err) => {
-        //             console.log(err)
-        //           })
-        //         } catch(err) {
-        //           console.log(err)
-        //           message.channel.reply("Please send a valid number.")
-        //         }
-        //       }
-        //     }
-        //     else if (typeof Number(args[0]) === 'number')
-        //     {
-        //       var id = Number(args[0])
-        //       axios.get(`${url}/memes/total`).then((res) => {
-        //         max = res.data.total
-        //         if (id >= 0 && id < max)
-        //         { 
-        //           axios.get(`${url}/${id}`).then((res) => {
-        //             var img = res.data
-        //             console.log(img)
-        //             if (img.format === 'mp4') {
-        //               return message.channel.send(img.url)
-        //             }
-        //             newEmbed
-        //             .setDescription(`Showing meme ${img.id}, with score: ${img.score}`)
-        //             .setImage(img.url)
-        //             .setTimestamp(new Date())
-        //             return message.channel.send(newEmbed)
-        //           }).catch((err) => {
-        //             console.log(err)
-        //           })
-        //         }
-        //         else
-        //         {
-        //           message.reply("Please send a valid number")
-        //         }
-        //       }).catch((err) => {
-        //         console.log(err)
-        //       })
-        //     }
-        // }  
-//     }
-// }
-  
