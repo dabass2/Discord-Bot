@@ -1,23 +1,20 @@
 {
   "name": "tfw",
-  "version": "1.0.0",
-  "description": "A bot made for fun",
-  "main": "index.js",
+  "version": "2.0.0",
+  "description": "Discord bot made for omega cool stuff",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Daniel Bass",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.19.2",
-    "discord.js": "^11.5.1",
+    "@discordjs/rest": "^0.1.0-canary.0",
+    "axios": "^0.24.0",
+    "discord-api-types": "^0.24.0",
+    "discord.js": "^13.3.1",
     "expand-string-professionally": "^1.0.1",
-    "images-scraper": "^5.0.6",
-    "jikanjs": "^0.7.0",
-    "request": "^2.88.0",
-    "rss-parser": "^3.7.2",
-    "select-random-file": "^1.1.0"
+    "jikanjs": "^0.7.0"
   },
-  "devDependencies": {},
   "keywords": []
 }

@@ -1,6 +1,3 @@
 /node_modules
-/memes
-/commands/test.js
 botconfig.json
-users.*
-*.txt
+old_commands

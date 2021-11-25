@@ -1,26 +1,21 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+
 module.exports = {
-    name: 'info',
-    description: 'Gives info about a user',
-    execute(message, args, newEmbed) {
-      //console.log(message.author.avatarURL)
-      if (args.length == 0)
-      {
-        //let usrPic = message.author.avatarURL;
-        newEmbed
-        .setDescription('User Information')
-        .setColor('#97e552')
-	.setImage(message.author.avatarURL)
-        //.setThumbnail(usrPic)
-        .addField('Username', message.author.username)
-        .addField('User Created on', message.author.createdAt)
-        //.addField('Joined at', message.member.joinedAt)
-        //.addField('Last message', message.)
-        return message.channel.send(newEmbed);
-      }
-      
-      if (args.length > 0)
-      {
-        message.reply('Ok chief calm down there think I finna code that much rn')
-      }
-    },
+    data: new SlashCommandBuilder()
+        .setName('info')
+        .setDescription('Gives info about a user'),
+    async execute(interaction, msgEmbed) {
+        let user = interaction.user
+
+        msgEmbed
+            .setDescription(`User Information for ${user.username}`)
+            .setColor(0x0a2b63)
+            .setThumbnail(user.displayAvatarURL())
+            .addField('Username', user.username)
+            .addField('Tag', user.tag)
+            .addField('ID', user.id)
+            .addField('Joined on', new Date(interaction.member.joinedTimestamp).toString())
+            .addField('User Created on', new Date(user.createdAt).toString())
+        await interaction.reply({ embeds: [msgEmbed] })
+    }
 };
