@@ -39,7 +39,12 @@ function update_score(post_id, post_action, score) {
 }
 
 async function create_message(interaction, post_id='', post_action='', repeat_dsbl=false, not_visible=false) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
+        if (post_id == -1) {
+            let max = await axios.get(api_url + "/memes/total")
+            post_id = max.data.total - 1
+        }
+
         let post_url = api_url
         if (post_id) {
             post_url += `/${post_id}`
