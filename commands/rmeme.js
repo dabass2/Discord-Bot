@@ -151,14 +151,14 @@ async function upload_post(interaction, upload_url) {
 
                 const videos = ['mp4', 'mov', 'webm']
                 if (videos.includes(post.format)) {
-                    let msg = `Meme #${post.id} with score: ${post.score}\n${post.url}`
-                    await interaction.reply({ content: msg, components: [create_buttons()], ephemeral: not_visible })
+                    let msg = `Uploaded new meme #${post.id} with score: ${post.score}\n${post.url}`
+                    await interaction.reply({ content: msg, components: [create_buttons()], ephemeral: true })
                 } else {
                     let msgEmbed = new MessageEmbed()
-                        .setDescription(`Meme #${post.id} with score: ${post.score}`)
+                        .setDescription(`Uploaded new meme #${post.id} with score: ${post.score}`)
                         .setImage(post.url)
                         .setTimestamp(new Date())
-                    await interaction.reply({ embeds: [msgEmbed], components: [create_buttons()], ephemeral: not_visible })
+                    await interaction.reply({ embeds: [msgEmbed], components: [create_buttons()], ephemeral: true })
                 }
                 resolve()
             }).catch((err) => {
@@ -171,7 +171,7 @@ async function update_post(interaction, post_id, post_action) {
     return new Promise((resolve, reject) => {
         axios.put(`${api_url}/${post_id}/${post_action}`, {votes: 1, token: botconfig.apiToken})
             .then(async (res) => {
-                await interaction.reply({ content: `Updated score for meme ${post_id}. New score: ${res.data.score}.` })
+                await interaction.reply({ content: `Updated score for meme ${post_id}. New score: ${res.data.score}.`, ephemeral: true })
                 resolve()
             })
             .catch((err) => {
