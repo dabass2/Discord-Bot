@@ -7,6 +7,7 @@ const check = 'DANGER'
 const emoji_db = ['🍎', '🥝', '🍒', '🍇', '🍉', '🍑', '🍊', '🍍', '🥑', '🍆', '🥕', '🍓', ]
 
 let board_size = 4
+let times_ignored = 0
 let game_board = []
 let emoji_board = []
 let running = false
@@ -71,7 +72,7 @@ async function next_turn(interaction, player) {
           x = Number(i.customId.split(',')[0])
           y = Number(i.customId.split(',')[1])
           if (game_board[x][y].emoji) {
-            await i.update({ components: create_game_buttons() })
+            await i.update({ content: 'Press Two Buttons', components: create_game_buttons() })
             return
           }
 
@@ -93,7 +94,7 @@ async function next_turn(interaction, player) {
             }
           }
 
-          await i.update({ components: create_game_buttons() })
+          await i.update({ content: 'Press Two Buttons', components: create_game_buttons() })
       })
 
       collector.on('end', async collected => {
@@ -135,12 +136,18 @@ module.exports = {
 
     await create_board()
     shuffle(emoji_board)
+    shuffle(emoji_board)
+    shuffle(emoji_board)
 
-		await og_interaction.reply({content: 'concentrate :susge:', components: create_game_buttons()})
-    while (true) {
+		await og_interaction.reply({content: 'Concentrate :thinking:', components: create_game_buttons()})
+    while (running) {
+      if (times_ignored > 2) {
+        await og_interaction.editReply({ content: 'No input for over 2 turns. Ending game.' })
+        break
+      }
       let result = await next_turn(og_interaction, og_interaction.user)
       if (!result) {
-        await og_interaction.editReply({content: 'concentrate :susge:', components: create_game_buttons()})
+        await og_interaction.editReply({content: 'Concentrate :thinking:', components: create_game_buttons()})
       } else {
         let end = performance.now()
         await sleep(500)
@@ -155,6 +162,7 @@ module.exports = {
 
 function reset_game() {
   running = false
+  times_ignored = 0
   game_board = []
   emoji_board = []
 }
