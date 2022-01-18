@@ -5,14 +5,8 @@ module.exports = {
         .setName('goodmorning')
         .setDescription('Wishes a homie goodmorning : )'),
     async execute(interaction, msgEmbed) {
-        a = Math.floor(Math.random() * 11);
-
-        let img
-        if (a >= 8) {   // 20% chance
-            img = "https://c.tenor.com/NdzzTkkCvB4AAAAC/peepo-wiadro.gif"
-        } else {        // 80% chance
-            img = "https://i.imgur.com/u2IfXac.png"
-        }
+        let mornings = ["https://c.tenor.com/NdzzTkkCvB4AAAAC/peepo-wiadro.gif", "https://i.imgur.com/u2IfXac.png", "https://c.tenor.com/_uvamdwOdV8AAAAd/yae-genshin.gif"]
+        img = mornings[Math.floor(Math.random() * mornings.length)]
 
         msgEmbed    
             .setColor("#ffffff")
