@@ -7,7 +7,7 @@ let leaderboard = {}
 
 function calc_game_stats(round, level) {
   const time_limit = (x,z) => Math.max(10 - (Math.floor(2**(x / (5-z)))), 2)
-  const word_length = (x,z) => Math.min(Math.round(4*Math.log10(x + z)), 10)
+  const word_length = (x,z) => Math.min(Math.max(Math.round(4*Math.log10(x + z)), 3), 10)
 
   let final_len = word_length(round, level)
   let rtn_msg = `${Math.max(final_len, 3)}-${final_len + level}`
@@ -26,6 +26,7 @@ function next_round(round, level, msgEmbed) {
     let time_limit = data[0] * 1000 // to millis
     let word_len = data[1]
     let rand_word = rword.generate(1, {length: word_len})
+    console.log(rand_word)
 
     let start_time = Date.now()
     let winner = ""
