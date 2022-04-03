@@ -21,7 +21,7 @@ for (const file of commandFiles) {
 
 client.on("ready", () => {
   console.log(`${client.user.username} is online`);
-  client.user.setActivity("Genshin Impact 2");
+  client.user.setActivity("No Build Fortnite");
 });
 
 client.on('interactionCreate', async interaction => {
@@ -49,9 +49,9 @@ client.on("messageCreate", message => {
   /* Ignores other bots messages */
   if (message.author.bot) return;
 
-  if (cmdArr.includes(cmd)) {
-    message.reply("tfw now supports slash (/) commands, try them out!")
-  }
+  // if (cmdArr.includes(cmd)) {
+  //   message.reply("tfw now supports slash (/) commands, try them out!")
+  // }
 });
 
 client.login(botconfig.token);
