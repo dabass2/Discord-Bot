@@ -36,22 +36,36 @@ client.on('interactionCreate', async interaction => {
 		await command.execute(interaction, cmdEmbed);
 	} catch (error) {
 		console.error(error);
-		await interaction.reply({ content: 'There was an error while executing this command.', ephemeral: true });
+    try { // there's likely a better way to do this, but I don't care enough to find it
+      if (interaction.user.id === '122090401011073029') {
+        await interaction.reply({ content: `There was an error while executing this command:\n${error}`, ephemeral: true });
+      } else {
+        await interaction.reply({ content: 'There was an error while executing this command.', ephemeral: true });
+      }
+    }
+    catch (_) {
+      // if here that means the above interaction was already replied to so it fails, so instead send a follow up
+      if (interaction.user.id === '122090401011073029') {
+        await interaction.followUp({ content: `There was an error while executing this command:\n${error}`, ephemeral: true });
+      } else {
+        await interaction.followUp({ content: 'There was an error while executing this command.', ephemeral: true });
+      }
+    }
 	}
 });
 
-client.on("messageCreate", message => {
+// client.on("messageCreate", message => {
   /* Message Handling */
-  let prefix = botconfig.prefix;
-  const args = message.content.slice(prefix.length).split(' ');
-  const cmd = args.shift().toLowerCase();
+  // let prefix = botconfig.prefix;
+  // const args = message.content.slice(prefix.length).split(' ');
+  // const cmd = args.shift().toLowerCase();
 
   /* Ignores other bots messages */
-  if (message.author.bot) return;
+  // if (message.author.bot) return;
 
   // if (cmdArr.includes(cmd)) {
   //   message.reply("tfw now supports slash (/) commands, try them out!")
   // }
-});
+// });
 
 client.login(botconfig.token);

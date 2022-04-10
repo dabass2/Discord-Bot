@@ -26,7 +26,6 @@ function next_round(round, level, msgEmbed) {
     let time_limit = data[0] * 1000 // to millis
     let word_len = data[1]
     let rand_word = rword.generate(1, {length: word_len})
-    console.log(rand_word)
 
     let start_time = Date.now()
     let winner = ""
