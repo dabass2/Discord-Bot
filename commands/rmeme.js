@@ -3,7 +3,7 @@ const { MessageActionRow, MessageButton, MessageEmbed } = require('discord.js');
 const axios = require('axios')
 const botconfig = require("../botconfig.json");
 
-const acceptedUsers = ['122090401011073029', '109685953911590912', '148296305536532480', '468421106219614208']
+const acceptedUsers = ['122090401011073029', '109685953911590912', '148296305536532480', '468421106219614208', '110412597399932928']
 const api_url = 'https://api.rmeme.me/rmeme'
 
 function create_buttons(repeat_dsbl=false) {
