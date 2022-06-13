@@ -219,37 +219,37 @@ function check_win(x, y) {
     return new Promise(async resolve => {
         let last_emoji = game_board[x][y].emoji.name
 
-        for (let i = 0; i < board_size; i++) {
+        for (let i = 0; i < 3; i++) {
           if (!game_board[x][i].emoji || game_board[x][i].emoji.name !== last_emoji) {
             break
-          } else if (i == board_size - 1) {
+          } else if (i == 3 - 1) {
             resolve(true)
           }
         }
 
-        for (let i = 0; i < board_size; i++) {
+        for (let i = 0; i < 3; i++) {
           if (!game_board[i][y].emoji || game_board[i][y].emoji.name !== last_emoji) {
             break
-          } else if (i == board_size - 1) {
+          } else if (i == 3 - 1) {
             resolve(true)
           }
         }
 
         if (x === y){
-          for (let i = 0; i < board_size; i++) {
+          for (let i = 0; i < 3; i++) {
             if (!game_board[i][i].emoji || game_board[i][i].emoji.name !== last_emoji) {
               break
-            } else if (i == board_size - 1) {
+            } else if (i == 3 - 1) {
               resolve(true)
             }
           }
         }
 
-        if ((x + y) === (board_size - 1)) {
+        if ((x + y) === (3 - 1)) {
           for (let i = 0; i < board_size; i++) {
-              if (!game_board[i][(board_size-1)-i].emoji || game_board[i][(board_size-1)-i].emoji.name !== last_emoji)
+              if (!game_board[i][(board_size-1)-i].emoji || game_board[i][(3-1)-i].emoji.name !== last_emoji)
                   break
-              if (i == board_size - 1) {
+              if (i == 3 - 1) {
                   resolve(true)
               }
           }
