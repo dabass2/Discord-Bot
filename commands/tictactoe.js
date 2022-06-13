@@ -246,8 +246,8 @@ function check_win(x, y) {
         }
 
         if ((x + y) === (3 - 1)) {
-          for (let i = 0; i < board_size; i++) {
-              if (!game_board[i][(board_size-1)-i].emoji || game_board[i][(3-1)-i].emoji.name !== last_emoji)
+          for (let i = 0; i < 3; i++) {
+              if (!game_board[i][(3-1)-i].emoji || game_board[i][(3-1)-i].emoji.name !== last_emoji)
                   break
               if (i == 3 - 1) {
                   resolve(true)
