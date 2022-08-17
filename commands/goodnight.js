@@ -6,11 +6,11 @@ module.exports = {
         .setName('goodnight')
         .setDescription('Wishes a homie goodnight : )'),
     async execute(interaction, msgEmbed) {
-        let nights = ["https://c.tenor.com/6l7lYskHVDQAAAAC/baal-genshin-baal.gif", "https://i.imgur.com/Hy0cpR2.png",
+        const NIGHTS = ["https://c.tenor.com/6l7lYskHVDQAAAAC/baal-genshin-baal.gif", "https://i.imgur.com/Hy0cpR2.png",
             "https://c.tenor.com/pEykNQWTaKIAAAAC/pepe-pepo.gif",
             "https://cdn.discordapp.com/attachments/110419059232780288/974151832433741884/original.jpg",
             "https://c.tenor.com/ZDF0F9Ehj0IAAAAC/hasanabi-hasan-piker.gif", "curse"]
-        let img = nights[Math.floor(Math.random() * nights.length)]
+        const img = NIGHTS[Math.floor(Math.random() * NIGHTS.length)]
         if (img === "curse") {
             await curse.execute(interaction, msgEmbed)
             return
