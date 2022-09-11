@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const seedrandom = require('seedrandom');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -9,7 +10,9 @@ module.exports = {
             "https://i.imgur.com/u2IfXac.png",
             "https://c.tenor.com/_uvamdwOdV8AAAAd/yae-genshin.gif",
             "https://c.tenor.com/uCq8oxh_qQ4AAAAd/hasan-abi.gif"]
-        const img = MORNINGS[Math.floor(Math.random() * MORNINGS.length)]
+        let now = new Date();
+        let rng = seedrandom(interaction.user.id + now.getDate() + now.getMonth() + now.getFullYear());
+        const img = MORNINGS[Math.floor(rng() * MORNINGS.length)]
 
         msgEmbed
             .setColor("#ffffff")

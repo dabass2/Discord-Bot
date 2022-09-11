@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const curse = require("./daddy")
+const seedrandom = require('seedrandom');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -10,7 +11,9 @@ module.exports = {
             "https://c.tenor.com/pEykNQWTaKIAAAAC/pepe-pepo.gif",
             "https://cdn.discordapp.com/attachments/110419059232780288/974151832433741884/original.jpg",
             "https://c.tenor.com/ZDF0F9Ehj0IAAAAC/hasanabi-hasan-piker.gif", "curse"]
-        const img = NIGHTS[Math.floor(Math.random() * NIGHTS.length)]
+        let now = new Date();
+        let rng = seedrandom(interaction.user.id + now.getDate() + now.getMonth() + now.getFullYear());
+        const img = NIGHTS[Math.floor(rng() * NIGHTS.length)]
         if (img === "curse") {
             await curse.execute(interaction, msgEmbed)
             return
