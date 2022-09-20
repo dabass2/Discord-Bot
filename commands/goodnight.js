@@ -13,7 +13,7 @@ module.exports = {
             "https://c.tenor.com/ZDF0F9Ehj0IAAAAC/hasanabi-hasan-piker.gif", "curse"]
         let now = new Date();
         let rng = seedrandom(interaction.user.id + now.getDate() + now.getMonth() + now.getFullYear());
-        const img = NIGHTS[Math.floor(rng() * NIGHTS.length)];
+        let img = NIGHTS[Math.floor(rng() * NIGHTS.length)];
         if (img === "curse" && interaction.user.id === '468421106219614208') {
             img = "https://c.tenor.com/ZDF0F9Ehj0IAAAAC/hasanabi-hasan-piker.gif"
         }
