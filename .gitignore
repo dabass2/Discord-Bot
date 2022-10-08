@@ -1,5 +1,3 @@
 /node_modules
 botconfig.json
-old_commands
-words_by_length.json
-words.json
+/lib*
