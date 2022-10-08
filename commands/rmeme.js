@@ -73,7 +73,7 @@ async function create_message(interaction, post_id='', post_action='', repeat_ds
                 let validIds = ['up', 'down', 'repeat']
                 const filter = i => validIds.includes(i.customId);
 
-                const collector = interaction.channel.createMessageComponentCollector({ filter, time: 30000 });
+                const collector = interaction.channel.createMessageComponentCollector({ filter, time: 60000 });
 
                 let score = 0
                 let repeat = false

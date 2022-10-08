@@ -5,7 +5,8 @@ const botconfig = require("../botconfig.json");
 const botIntents = new Discord.Intents()
 botIntents.add(
   Discord.Intents.FLAGS.GUILD_MESSAGES,
-  Discord.Intents.FLAGS.GUILDS
+  Discord.Intents.FLAGS.GUILDS,
+  Discord.Intents.FLAGS.GUILD_MEMBERS
 )
 
 const client = new Discord.Client({ intents: botIntents });

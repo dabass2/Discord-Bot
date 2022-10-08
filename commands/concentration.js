@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageActionRow ,MessageButton } = require('discord.js');
+const { MessageButton } = require('discord.js');
 
 const empty = 'SECONDARY'
 const match = 'SUCCESS'
@@ -12,6 +12,15 @@ let game_board = []
 let emoji_board = []
 let running = false
 let start
+
+function create_button(id, style, emoji=null, disable=false) {
+  return new MessageButton()
+      .setCustomId(id)
+      .setStyle(style)
+      .setEmoji(emoji)
+      .setLabel(emoji ? '' : ' ')      // Whitespace is necessary if emoji is null.
+      .setDisabled(disable)
+}
 
 function create_board() {
   return new Promise(resolve => {
@@ -33,15 +42,6 @@ function create_board() {
   })
 }
 
-function create_button(id, style, emoji=null, disable=false) {
-  return new MessageButton()
-      .setCustomId(id)
-      .setStyle(style)
-      .setEmoji(emoji)
-      .setLabel(emoji ? '' : ' ')      // Whitespace is necessary if emoji is null.
-      .setDisabled(disable)
-}
-
 function create_game_buttons() {
   let buttons = []
   for (let i = 0; i < board_size; i++) {
@@ -52,12 +52,6 @@ function create_game_buttons() {
 
 async function next_turn(interaction, player) {
   return new Promise(async resolve => {
-      if (player.id === "500122158039826433") {
-          let turn = await bot_turn()
-          resolve(turn)
-          return
-      }
-
       //  || player.id === "500122158039826433"
       // ^^^ Add to filter to debug. Shouldn't matter even if left in, but you know
       const filter = i => i.user.id === player.id
@@ -139,7 +133,7 @@ module.exports = {
     shuffle(emoji_board)
     shuffle(emoji_board)
 
-		await og_interaction.reply({content: 'Concentrate :thinking:', components: create_game_buttons()})
+		await og_interaction.reply({ content: 'Concentrate :thinking:', components: create_game_buttons() })
     while (running) {
       if (times_ignored > 2) {
         await og_interaction.editReply({ content: 'No input for over 2 turns. Ending game.' })
@@ -147,11 +141,11 @@ module.exports = {
       }
       let result = await next_turn(og_interaction, og_interaction.user)
       if (!result) {
-        await og_interaction.editReply({content: 'Concentrate :thinking:', components: create_game_buttons()})
+        await og_interaction.editReply({ content: 'Concentrate :thinking:', components: create_game_buttons() })
       } else {
         let end = performance.now()
         await sleep(500)
-        og_interaction.editReply({content: `Game Over! Time: ${((end - start)/1000).toFixed(2)}s.`, components: create_game_buttons()})
+        og_interaction.editReply({ content: `Game Over! Time: ${((end - start)/1000).toFixed(2)}s.`, components: create_game_buttons() })
         break
       }
     }
