@@ -1,22 +1,28 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageActionRow, MessageButton, MessageEmbed } = require('discord.js');
+const {
+    SlashCommandBuilder
+} = require('@discordjs/builders');
+const {
+    MessageActionRow,
+    MessageButton,
+    MessageEmbed
+} = require('discord.js');
 const axios = require('axios')
 const botconfig = require("../botconfig.json");
 
 const acceptedUsers = ['122090401011073029', '109685953911590912', '148296305536532480', '468421106219614208', '110412597399932928']
 const api_url = 'https://api.rmeme.me/rmeme'
 
-function create_buttons(repeat_dsbl=false) {
+function create_buttons(repeat_dsbl = false) {
     return new MessageActionRow()
         .addComponents(
             new MessageButton()
-                .setCustomId('up')
-                .setStyle('SUCCESS')
-                .setEmoji('✔️'),
+            .setCustomId('up')
+            .setStyle('SUCCESS')
+            .setEmoji('✔️'),
             new MessageButton()
-                .setCustomId('down')
-                .setStyle('DANGER')
-                .setEmoji('✖️'),
+            .setCustomId('down')
+            .setStyle('DANGER')
+            .setEmoji('✖️'),
             // Break glass in case of will power
             // new MessageButton()
             //     .setCustomId('repeat')
@@ -28,7 +34,10 @@ function create_buttons(repeat_dsbl=false) {
 
 function update_score(post_id, post_action, score) {
     return new Promise((resolve, reject) => {
-        axios.put(`${api_url}/${post_id}/${post_action}`, {votes: score, token: botconfig.apiToken})
+        axios.put(`${api_url}/${post_id}/${post_action}`, {
+                votes: score,
+                token: botconfig.apiToken
+            })
             .then((res) => {
                 resolve(res)
             })
@@ -38,22 +47,21 @@ function update_score(post_id, post_action, score) {
     })
 }
 
-async function create_message(interaction, post_id='', post_action='', repeat_dsbl=false, not_visible=false) {
+async function create_message(interaction, post_id = '', post_action = '', repeat_dsbl = false, not_visible = false) {
     return new Promise(async (resolve, reject) => {
-        if (post_id == -1) {
+        if (post_id < 0) {
             let max = await axios.get(api_url + "/memes/total")
-            post_id = max.data.total - 1
+            post_id = Math.abs(post_id) <= max.data.total ? max.data.total - Math.abs(post_id) : max.data.total - 1
         }
 
         let post_url = api_url
-        if (post_id) {
+        if (post_id == 0 || post_id) {
             post_url += `/${post_id}`
         }
-        
+
         if (post_action) {
             post_url += `/${post_action}`
         }
-
         axios.get(post_url)
             .then(async res => {
                 let post = res.data
@@ -61,19 +69,30 @@ async function create_message(interaction, post_id='', post_action='', repeat_ds
                 const videos = ['mp4', 'mov', 'webm']
                 if (videos.includes(post.format)) {
                     let msg = `Meme #${post.id} with score: ${post.score}\n${post.url}`
-                    await interaction.reply({ content: msg, components: [create_buttons()], ephemeral: not_visible })
+                    await interaction.reply({
+                        content: msg,
+                        components: [create_buttons()],
+                        ephemeral: not_visible
+                    })
                 } else {
                     let msgEmbed = new MessageEmbed()
                         .setDescription(`Meme #${post.id} with score: ${post.score}`)
                         .setImage(post.url)
                         .setTimestamp(new Date())
-                    await interaction.reply({ embeds: [msgEmbed], components: [create_buttons()], ephemeral: not_visible })
+                    await interaction.reply({
+                        embeds: [msgEmbed],
+                        components: [create_buttons()],
+                        ephemeral: not_visible
+                    })
                 }
 
                 let validIds = ['up', 'down', 'repeat']
                 const filter = i => validIds.includes(i.customId);
 
-                const collector = interaction.channel.createMessageComponentCollector({ filter, time: 60000 });
+                const collector = interaction.channel.createMessageComponentCollector({
+                    filter,
+                    time: 60000
+                });
 
                 let score = 0
                 let repeat = false
@@ -107,7 +126,9 @@ async function create_message(interaction, post_id='', post_action='', repeat_ds
                     }
 
                     // Do this so button will exit loading state
-                    await i.update({ components: [create_buttons(repeat_dsbl)] })
+                    await i.update({
+                        components: [create_buttons(repeat_dsbl)]
+                    })
                 });
 
                 collector.on('end', () => {
@@ -133,7 +154,10 @@ async function create_message(interaction, post_id='', post_action='', repeat_ds
                                 .setDescription(`Meme #${post.id} with score: ${post.score + score}`)
                                 .setImage(post.url)
                                 .setTimestamp(new Date())
-                            await interaction.editReply({ embeds: [updatedEmbed], ephemeral: not_visible })
+                            await interaction.editReply({
+                                embeds: [updatedEmbed],
+                                ephemeral: not_visible
+                            })
                             resolve(repeat)
                         })
                         .catch(err => {
@@ -142,7 +166,10 @@ async function create_message(interaction, post_id='', post_action='', repeat_ds
                 });
             })
             .catch(async err => {
-                await interaction.reply({ content: "Invalid meme ID. Please try again.", ephemeral: not_visible })
+                await interaction.reply({
+                    content: "Invalid meme ID. Please try again.",
+                    ephemeral: not_visible
+                })
                 reject(err.data)
             })
     })
@@ -150,20 +177,31 @@ async function create_message(interaction, post_id='', post_action='', repeat_ds
 
 async function upload_post(interaction, upload_url) {
     return new Promise((resolve, reject) => {
-        axios.post(`${api_url}/create`, {url: upload_url, token: botconfig.apiToken})
+        axios.post(`${api_url}/create`, {
+                url: upload_url,
+                token: botconfig.apiToken
+            })
             .then(async (res) => {
                 let post = res.data
 
                 const videos = ['mp4', 'mov', 'webm']
                 if (videos.includes(post.format)) {
                     let msg = `Uploaded new meme #${post.id} with score: ${post.score}\n${post.url}`
-                    await interaction.reply({ content: msg, components: [create_buttons()], ephemeral: true })
+                    await interaction.reply({
+                        content: msg,
+                        components: [create_buttons()],
+                        ephemeral: true
+                    })
                 } else {
                     let msgEmbed = new MessageEmbed()
                         .setDescription(`Uploaded new meme #${post.id} with score: ${post.score}`)
                         .setImage(post.url)
                         .setTimestamp(new Date())
-                    await interaction.reply({ embeds: [msgEmbed], components: [create_buttons()], ephemeral: true })
+                    await interaction.reply({
+                        embeds: [msgEmbed],
+                        components: [create_buttons()],
+                        ephemeral: true
+                    })
                 }
                 resolve()
             }).catch((err) => {
@@ -174,9 +212,15 @@ async function upload_post(interaction, upload_url) {
 
 async function update_post(interaction, post_id, post_action) {
     return new Promise((resolve, reject) => {
-        axios.put(`${api_url}/${post_id}/${post_action}`, {votes: 1, token: botconfig.apiToken})
+        axios.put(`${api_url}/${post_id}/${post_action}`, {
+                votes: 1,
+                token: botconfig.apiToken
+            })
             .then(async (res) => {
-                await interaction.reply({ content: `Updated score for meme ${post_id}. New score: ${res.data.score}.`, ephemeral: true })
+                await interaction.reply({
+                    content: `Updated score for meme ${post_id}. New score: ${res.data.score}.`,
+                    ephemeral: true
+                })
                 resolve()
             })
             .catch((err) => {
@@ -187,9 +231,15 @@ async function update_post(interaction, post_id, post_action) {
 
 async function delete_post(interaction, post_id) {
     return new Promise((resolve, reject) => {
-        axios.delete(`${api_url}/del/${post_id}`, {data: {token:botconfig.apiToken}})
+        axios.delete(`${api_url}/del/${post_id}`, {
+                data: {
+                    token: botconfig.apiToken
+                }
+            })
             .then(async (res) => {
-                await interaction.reply({ content: `Deleted meme ${post_id}.` })
+                await interaction.reply({
+                    content: `Deleted meme ${post_id}.`
+                })
                 resolve()
             })
             .catch((err) => {
@@ -204,29 +254,29 @@ module.exports = {
         .setDescription('Send, vote, upload, or delete memes!')
         .addSubcommand(getSubCmd =>
             getSubCmd.setName('get')
-                .setDescription('Select a specific meme to view and/or vote on.')
-                .addNumberOption(num_opt =>
-                    num_opt.setName('id')
-                        .setDescription("Select a specific meme to view and/or vote on.")
-                )
-                .addStringOption(vote_opt =>
-                    vote_opt.setName('action')
-                        .setDescription('Upvote, Downvote, or Delete a post')
-                        .addChoice('up', 'up')
-                        .addChoice('down', 'down')
-                        .addChoice('delete', 'delete')
-                )
+            .setDescription('Select a specific meme to view and/or vote on.')
+            .addNumberOption(num_opt =>
+                num_opt.setName('id')
+                .setDescription("Select a specific meme to view and/or vote on.")
+            )
+            .addStringOption(vote_opt =>
+                vote_opt.setName('action')
+                .setDescription('Upvote, Downvote, or Delete a post')
+                .addChoice('up', 'up')
+                .addChoice('down', 'down')
+                .addChoice('delete', 'delete')
+            )
         )
         .addSubcommand(upldSubCmd =>
             upldSubCmd.setName('upload')
-                .setDescription('Upload a new meme.')
-                .addStringOption(url_opt =>
-                    url_opt.setName('url')
-                        .setDescription('The url of the post to be uploaded')
-                        .setRequired(true)
-                )
+            .setDescription('Upload a new meme.')
+            .addStringOption(url_opt =>
+                url_opt.setName('url')
+                .setDescription('The url of the post to be uploaded')
+                .setRequired(true)
+            )
         ),
-    async execute(interaction) {  
+    async execute(interaction) {
         const post_id = interaction.options.getNumber('id')
         const post_action = interaction.options.getString('action')
         const upload_url = interaction.options.getString('url')
@@ -236,24 +286,30 @@ module.exports = {
                 if (acceptedUsers.includes(interaction.user.id)) {
                     await upload_post(interaction, upload_url)
                 } else {
-                    await interaction.reply({ content: "You cannot use this command.", ephemeral: true })
+                    await interaction.reply({
+                        content: "You cannot use this command.",
+                        ephemeral: true
+                    })
                 }
             } else if (interaction.options.getSubcommand() === 'get') {
-                if (!post_id && !post_action) {         // Nothing given, send random meme
+                if (post_id === null && !post_action) { // Nothing given, send random meme
                     await create_message(interaction)
-                } else if (post_id && !post_action) {   // Just post ID, try to send whatever was requested
+                } else if (post_id !== null && !post_action) { // Just post ID, try to send whatever was requested
                     await create_message(interaction, post_id, null, true)
-                } else if (post_id && post_action) {    // Could be voting up/down or deleting a post
+                } else if (post_id !== null && post_action) { // Could be voting up/down or deleting a post
                     if (post_action === "delete" && acceptedUsers.includes(interaction.user.id)) {
                         await delete_post(interaction, post_id)
                     } else if (post_action === "up" || post_action === "down") {
                         await update_post(interaction, post_id, post_action, true)
                     } else {
-                        await interaction.reply({ content: "You cannot use this command.", ephemeral: true })
+                        await interaction.reply({
+                            content: "You cannot use this command.",
+                            ephemeral: true
+                        })
                     }
                 }
             }
-        } catch(err) {
+        } catch (err) {
             return new Error(err)
         }
     }
