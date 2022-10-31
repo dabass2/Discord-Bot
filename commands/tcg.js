@@ -1,8 +1,9 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { get_info, pull_new_card } = require('../lib/db')
 
-function pull_card() {
-    pull_new_card()
+async function pull_card() {
+    rtn = await pull_new_card()
+    console.log(rtn)
 }
 
 module.exports = {
@@ -28,8 +29,8 @@ module.exports = {
             default:
                 break;
         }
-        const info = await get_info()
-        console.log(info)
+        // const info = await get_info()
+        // console.log(info)
         msgEmbed
             .setColor("#4538f5")
             .setTitle("TIC the Trading Card Game")
